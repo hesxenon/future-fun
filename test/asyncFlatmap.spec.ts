@@ -16,13 +16,24 @@ describe('flatPromise', () => {
     })
   })
 
-  it('should not overwrite the function return type', done => {
+  it('should be possible to test mapped calls with different parameters', done => {
+    const [assert2, assert1] = proxec(done, (x: number) => assert(x === 2), (x: number) => assert(x === 1))
     const c = call(x => x, Promise.resolve(1))
       .pipe(asyncFlatmap(x => x))
     c.fn(Promise.resolve(2))
-    c.then(num => {
-      assert(num === 1)
-      done()
-    })
+      .then(assert2)
+
+    c.then(assert1)
   })
 })
+
+function proxec (after: Function, ...cbs: Function[]) {
+  const exec = (cb: Function) => (...args: any[]) => {
+    cb(...args)
+    cbs.splice(cbs.indexOf(cb), 1)
+    if (cbs.length === 0) {
+      after()
+    }
+  }
+  return cbs.map(exec)
+}
