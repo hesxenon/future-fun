@@ -1,4 +1,5 @@
-import { CallFn, Operator, Call, then } from "./call";
+import { CallFn, Call, Operator } from "./types";
+import { then } from "./call";
 
 export function flatMap<In, Out>(fn: CallFn<In, Call<Out>>, thisArg?: any): Operator<In, Out> {
   return (previous: Call<In>) => {
