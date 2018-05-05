@@ -1,6 +1,6 @@
-import { CallFn, Operator, Call } from "./types";
-import { then } from "./call";
+import { CallFn, Operator, Call, Finish } from "./types";
+import { pipe } from "./call";
 
-export function createOperator<In, Out>(fn: CallFn<In, Out>, thisArg: any, exec: (previous: Call<In>) => Out): Operator<In, Out> {
-  return (previous: Call<In>) => ({ fn, previous, then, exec: () => exec(previous), thisArg })
+export function createOperator<In, Out>(fn: CallFn<In, Out>, thisArg: any, exec: (prevRes: In, cb: Finish<Out>) => void): Operator<In, Out> {
+  return (previous: Call<In>) => ({ fn, previous, pipe, then: (cb) => previous.then(prevRes => exec(prevRes, cb)), thisArg })
 }
