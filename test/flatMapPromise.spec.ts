@@ -1,6 +1,6 @@
 import { call } from '../src/call'
 import { ident } from './test.util'
-import { asyncFlatmap } from '../src/asyncFlatmap'
+import { asyncFlatmap } from '../src/flatMapPromise'
 import { Finish, map } from '..'
 import { assert } from 'chai'
 import * as fs from 'fs'
