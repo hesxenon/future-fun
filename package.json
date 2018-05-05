@@ -1,6 +1,6 @@
 {
   "name": "future-fun",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a way to abstract calls and chain them for easier unit testing and deferred execution",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,13 @@
     "prepare": "npm run build",
     "lint": "tslint -p ."
   },
-  "keywords": ["thunk", "call", "callify", "unit testing", "future computation"],
+  "keywords": [
+    "thunk",
+    "call",
+    "callify",
+    "unit testing",
+    "future computation"
+  ],
   "author": "dpot",
   "license": "MIT",
   "devDependencies": {
