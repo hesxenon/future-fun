@@ -6,7 +6,8 @@
   "scripts": {
     "test": "npm run build && mocha",
     "build": "tsc",
-    "build:w": "tsc -w"
+    "build:w": "tsc -w",
+    "prepare": "npm run build"
   },
   "keywords": [],
   "author": "",
