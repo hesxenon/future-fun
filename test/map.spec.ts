@@ -1,9 +1,7 @@
 import { call } from "../src/call";
 import { map } from "../src/map";
 import { assert } from "chai";
-
-const ident = (x: number) => x
-const double = (x: number) => x * 2
+import { ident, double } from "./test.util";
 
 describe('map', () => {
   it('should execute so that B º A is satisfied', () => {
