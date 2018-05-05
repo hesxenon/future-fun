@@ -1,14 +1,15 @@
-export interface Call<Out = any, In = any, FnOut = Out, Previous = undefined> {
-  fn: CallFn<In, FnOut>,
+export interface Call<Out = any, In = any, Previous = undefined> {
+  fn: CallFn<In>,
   arg?: In,
+  exec: (arg: In | undefined, finish: Finish<Out>) => void,
   then: (finish: Finish<Out>) => void,
   previous: Previous,
   thisArg?: any,
   pipe: PipeFn
 }
 
-export interface Operator<In, Out, FnOut> {
-  <Previous extends Call>(previous: Previous): Call<Out, In, FnOut, Previous>
+export interface Operator<In, Out> {
+  <Previous extends Call>(previous: Previous): Call<Out, In, Previous>
 }
 
 export interface CallFn<In = any, Out = any> {
@@ -20,5 +21,5 @@ export interface Finish<Out> {
 }
 
 export interface PipeFn {
-  <In, Out, FnOut, PIn, PFnOut, PP>(this: Call<In, PIn, PFnOut, PP>, next: Operator<In, Out, FnOut>): Call<Out, In, FnOut, typeof this>
+  <In, Out, FnOut, PIn, PP>(this: Call<In, PIn, PP>, next: Operator<In, Out>): Call<Out, In, typeof this>
 }
