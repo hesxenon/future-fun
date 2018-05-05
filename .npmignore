@@ -1,3 +1,5 @@
 *
 !src/**/*.js
 !src/**/*.d.ts
+!index.d.ts
+!index.js
