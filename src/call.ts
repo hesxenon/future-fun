@@ -4,7 +4,7 @@ export interface Call<Out = any, In = any, Previous = any> {
   exec: () => Out,
   previous: Previous,
   thisArg?: any,
-  then: <Out1>(next: ReturnType<Operator<Out, Out1>>) => Call<Out1, Out, Call<Out, In, Previous>>
+  then: <Out1>(next: Operator<Out, Out1>) => Call<Out1, Out, Call<Out, In, Previous>>
 }
 
 export function call<Out, In = any>(fn: CallFn<In, Out>, arg?: In, thisArg?: any): Call<Out, In, undefined> {
@@ -16,12 +16,12 @@ export function call<Out, In = any>(fn: CallFn<In, Out>, arg?: In, thisArg?: any
   }
 }
 
-export function then<Out, Previous>(this: Call<Previous>, operatorResult: ReturnType<Operator<Previous, Out>>): Call<Out, Previous, Call<Previous>> {
-  return Object.assign(operatorResult(this), { previous: this, then })
+export function then<Out, Previous>(this: Call<Previous>, operator: Operator<Previous, Out>): Call<Out, Previous, Call<Previous>> {
+  return Object.assign(operator(this), { previous: this, then })
 }
 
 export interface Operator<In, Out> {
-  (fn: CallFn<In, Out>, thisArg: any): (previous: Call<In>) => Call<Out, In>
+  (previous: Call<In>): Call<Out, In>
 }
 
 export type CallFn<In, Out> = (arg: In) => Out
