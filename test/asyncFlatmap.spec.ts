@@ -1,31 +1,27 @@
 import { call } from '../src/call'
 import { ident } from './test.util'
 import { asyncFlatmap } from '../src/asyncFlatmap'
-import { Finish } from '..'
+import { Finish, map } from '..'
 import { assert } from 'chai'
 import * as fs from 'fs'
 
 describe('flatPromise', () => {
   it('should directly map to the result of a promise', done => {
-    const c = call(ident, 1).pipe(asyncFlatmap(x => Promise.resolve(x + ''), (promise) => promise.then))
+    const c = call(x => x, 1)
+      .pipe(asyncFlatmap(x => Promise.resolve(x + '')))
+
     c.then(result => {
       assert(result === '1')
       done()
     })
   })
 
-  it('should map directly to the result of a callback', done => {
-    const c = call(ident, __filename).pipe(asyncFlatmap(path => {
-      return (finish: Finish<fs.Stats>) => {
-        fs.stat(path, (err, stats) => {
-          if (err) throw err
-          finish(stats)
-        })
-      }
-    }))
-
-    c.then(stats => {
-      assert(stats.isFile())
+  it('should not overwrite the function return type', done => {
+    const c = call(x => x, Promise.resolve(1))
+      .pipe(asyncFlatmap(x => x))
+    c.fn(Promise.resolve(2))
+    c.then(num => {
+      assert(num === 1)
       done()
     })
   })
