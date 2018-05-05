@@ -1,0 +1,14 @@
+{
+  "extends": "tslint-config-standard",
+  "linterOptions": {
+    "exclude": [
+      "node_modules"
+    ]
+  },
+  "rules": {
+    "no-use-before-declare": false,
+    "no-unused-variable": {
+      "severity": "warning"
+    }
+  }
+}

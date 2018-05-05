@@ -7,7 +7,8 @@
     "test": "npm run build && mocha",
     "build": "tsc",
     "build:w": "tsc -w",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "lint": "tslint -p ."
   },
   "keywords": ["thunk", "call", "callify", "unit testing", "future computation"],
   "author": "dpot",

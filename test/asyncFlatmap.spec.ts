@@ -1,8 +1,8 @@
-import { call } from "../src/call";
-import { ident, double } from "./test.util";
-import { asyncFlatmap } from "../src/flatPromise";
-import { map, Finish } from "..";
-import { assert } from "chai";
+import { call } from '../src/call'
+import { ident } from './test.util'
+import { asyncFlatmap } from '../src/flatPromise'
+import { Finish } from '..'
+import { assert } from 'chai'
 import * as fs from 'fs'
 
 describe('flatPromise', () => {
