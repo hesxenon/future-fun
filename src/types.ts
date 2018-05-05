@@ -1,4 +1,4 @@
-export interface Call<Out = any, In = any, Previous = undefined> {
+export interface Call<Out = any, In = any, Previous = any> {
   fn: CallFn<In>,
   arg?: In,
   exec: (arg: In | undefined, finish: Finish<Out>) => void,
