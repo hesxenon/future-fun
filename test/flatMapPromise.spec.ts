@@ -1,6 +1,6 @@
 import { call } from '../src/call'
 import { ident } from './test.util'
-import { asyncFlatmap } from '../src/flatMapPromise'
+import { flatMapPromise } from '../src/flatMapPromise'
 import { Finish, map } from '..'
 import { assert } from 'chai'
 import * as fs from 'fs'
@@ -8,7 +8,7 @@ import * as fs from 'fs'
 describe('flatPromise', () => {
   it('should directly map to the result of a promise', done => {
     const c = call(x => x, 1)
-      .pipe(asyncFlatmap(x => Promise.resolve(x + '')))
+      .pipe(flatMapPromise(x => Promise.resolve(x + '')))
 
     c.then(result => {
       assert(result === '1')
@@ -19,7 +19,7 @@ describe('flatPromise', () => {
   it('should be possible to test mapped calls with different parameters', done => {
     const [assert2, assert1] = proxec(done, (x: number) => assert(x === 2), (x: number) => assert(x === 1))
     const c = call(x => x, Promise.resolve(1))
-      .pipe(asyncFlatmap(x => x))
+      .pipe(flatMapPromise(x => x))
 
     c.exec(Promise.resolve(2), assert2)
 
