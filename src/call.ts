@@ -4,8 +4,8 @@ export function call<Out, In = any> (fn: CallFn<In, Out>, arg?: In, thisArg?: an
   const exec = (arg?: In) => fn.call(thisArg, arg)
   return {
     fn, arg, previous: undefined, thisArg,
-    exec: (arg, cb) => cb(exec(arg)),
-    then: (cb) => cb(exec(arg)),
+    test: (arg, cb) => cb(exec(arg)),
+    exec: (cb) => cb(exec(arg)),
     pipe
   }
 }

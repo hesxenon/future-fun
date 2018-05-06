@@ -7,7 +7,7 @@ import { map, Call } from '..'
 describe('flatMap', () => {
   it('should be able to pass on the result of a nested call', done => {
     const c = call(ident, 1).pipe(flatMap(x => call(double, x)))
-    c.then(x => {
+    c.exec(x => {
       assert(x === 2)
       done()
     })
@@ -22,11 +22,11 @@ describe('flatMap', () => {
     const c = call(x => x, 1)
       .pipe(flatMap(send))
 
-    c.exec(2, ({ out }) => {
+    c.test(2, ({ out }) => {
       assert(out.previous.fn === apiCall)
     })
 
-    c.then(x => {
+    c.exec(x => {
       assert(x === 1)
       done()
     })
