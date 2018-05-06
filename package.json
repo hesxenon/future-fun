@@ -7,7 +7,7 @@
     "test": "npm run build && mocha",
     "build": "tsc",
     "build:w": "tsc -w",
-    "prepare": "npm run build",
+    "prepack": "npm run test",
     "lint": "tslint -p ."
   },
   "keywords": [
