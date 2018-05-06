@@ -1,5 +1,5 @@
 import { call } from '../src/call'
-import { Finish, map, flatMapPromise } from '..'
+import { map, flatMapPromise } from '..'
 import { assert } from 'chai'
 import * as fs from 'fs'
 

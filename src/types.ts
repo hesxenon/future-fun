@@ -1,8 +1,8 @@
 export interface Call<Resolve = any, In = any, Out = any, Previous = any> {
   fn: CallFn<In, Out>,
   arg?: In,
-  test: (arg: In | undefined, finish: (result: ExecArg<Resolve, Out>) => void) => void,
-  exec: (finish: Finish<Resolve>) => void,
+  test: (arg: In | undefined, cb: TestCallback<Resolve, Out>) => void,
+  exec: (cb: ExecCallback<Resolve>) => void,
   previous: Previous,
   thisArg?: any,
   pipe: <Resolve, In, Out, PIn, POut, PP>(this: Call<In, PIn, POut, PP>, next: Operator<Resolve, In, Out>) => Call<Resolve, In, Out, typeof this>
@@ -16,15 +16,19 @@ export interface CallFn<In = any, Out = any> {
   (arg: In): Out
 }
 
-export interface Finish<Resolve> {
+export interface ExecCallback<Resolve> {
   (result: Resolve): void
 }
 
-export interface ThenArg<Resolve> {
+export interface ExecArg<Resolve> {
   resolve: Resolve
 }
 
-export interface ExecArg<Resolve, Out> {
+export interface TestCallback<Resolve, Out> {
+  (result: TestArg<Resolve, Out>): void
+}
+
+export interface TestArg<Resolve, Out> {
   out: Out,
   resolve: Resolve
 }
