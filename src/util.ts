@@ -1,6 +1,6 @@
 import { CallFn, Operator, Call, ExecCallback } from './types'
 
-export function createOperator<Resolve, In, Out> (fn: CallFn<In, Out>, thisArg: any, exec: (previous: In | undefined, finish: ExecCallback<Resolve>) => void): Operator<Resolve, In, Out> {
+export function createOperator<Resolve, In, Out> (fn: CallFn<In, Out>, thisArg: any, exec: (previous: In, finish: ExecCallback<Resolve>) => void): Operator<Resolve, In, Out> {
   return (previous) => ({
     fn, previous, pipe, thisArg,
     exec: cb => previous.exec(prevRes => exec(prevRes, cb)),
@@ -14,6 +14,6 @@ export function createOperator<Resolve, In, Out> (fn: CallFn<In, Out>, thisArg: 
 }
 
 export function pipe<In, Resolve, Out, PIn, POut, PP> (this: Call<In, PIn, POut, PP>, next: Operator<Resolve, In, Out>): Call<Resolve, In, Out, typeof this> {
-  const c = Object.assign(next<any>(this), { previous: this, pipe })
+  const c = Object.assign(next(this), { previous: this, pipe })
   return c
 }

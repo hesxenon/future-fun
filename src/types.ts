@@ -1,7 +1,7 @@
 export interface Call<Resolve = any, In = any, Out = any, Previous = any> {
   fn: CallFn<In, Out>,
   arg?: In,
-  test: (arg: In | undefined, cb: TestCallback<Resolve, Out>) => void,
+  test: (arg: In, cb: TestCallback<Resolve, Out>) => void,
   exec: (cb: ExecCallback<Resolve>) => void,
   previous: Previous,
   thisArg?: any,
@@ -9,7 +9,7 @@ export interface Call<Resolve = any, In = any, Out = any, Previous = any> {
 }
 
 export interface Operator<Resolve, In, Out> {
-  <Previous extends Call>(previous: Previous): Call<Resolve, In, Out, Previous>
+  <PI, PO, PP>(previous: Call<In, PI, PO, PP>): Call<Resolve, In, Out, Call<In, PI, PO, PP>>
 }
 
 export interface CallFn<In = any, Out = any> {
