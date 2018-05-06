@@ -1,4 +1,4 @@
-import { ident, double } from './test.util'
+import { double } from './test.util'
 import { call } from '../src/call'
 import { flatMap } from '../src/flatMap'
 import { assert } from 'chai'
@@ -6,7 +6,7 @@ import { map, Call } from '..'
 
 describe('flatMap', () => {
   it('should be able to pass on the result of a nested call', done => {
-    const c = call(ident, 1).pipe(flatMap(x => call(double, x)))
+    const c = call(x => x, 1).pipe(flatMap(x => call(double, x)))
     c.exec(x => {
       assert(x === 2)
       done()

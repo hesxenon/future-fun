@@ -5,10 +5,10 @@ export interface Call<Resolve = any, In = any, Out = any, Previous = any> {
   exec: (finish: Finish<Resolve>) => void,
   previous: Previous,
   thisArg?: any,
-  pipe: <Resolve, In, Out, PIn, POut, PP>(this: Call<In, PIn, POut, PP>, next: Operator<In, Resolve, Out>) => Call<Resolve, In, Out, typeof this>
+  pipe: <Resolve, In, Out, PIn, POut, PP>(this: Call<In, PIn, POut, PP>, next: Operator<Resolve, In, Out>) => Call<Resolve, In, Out, typeof this>
 }
 
-export interface Operator<In, Resolve, Out> {
+export interface Operator<Resolve, In, Out> {
   <Previous extends Call>(previous: Previous): Call<Resolve, In, Out, Previous>
 }
 
