@@ -21,7 +21,9 @@ describe('flatPromise', () => {
     const c = call(x => x, Promise.resolve(1))
       .pipe(flatMapPromise(x => x))
 
-    c.exec(Promise.resolve(2), assert2)
+    c.exec(Promise.resolve(2), ({ resolve }) => {
+      assert2(resolve)
+    })
 
     c.then(assert1)
   })

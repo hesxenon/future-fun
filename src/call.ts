@@ -1,6 +1,6 @@
 import { CallFn, Call, Operator } from './types'
 
-export function call<Out, In = any> (fn: CallFn<In, Out>, arg?: In, thisArg?: any): Call<Out, In, undefined> {
+export function call<Out, In = any> (fn: CallFn<In, Out>, arg?: In, thisArg?: any): Call<Out, In, Out, undefined> {
   const exec = (arg?: In) => fn.call(thisArg, arg)
   return {
     fn, arg, previous: undefined, thisArg,
@@ -10,7 +10,7 @@ export function call<Out, In = any> (fn: CallFn<In, Out>, arg?: In, thisArg?: an
   }
 }
 
-export function pipe<In, Out, FnOut, PIn, PP> (this: Call<In, PIn, PP>, next: Operator<In, Out>): Call<Out, In, typeof this> {
+export function pipe<In, Out, FnOut, PIn, PFnOut, PP> (this: Call<In, PIn, PFnOut, PP>, next: Operator<In, Out, FnOut>): Call<Out, In, FnOut, typeof this> {
   const c = Object.assign(next<any>(this), { previous: this, pipe })
   return c
 }

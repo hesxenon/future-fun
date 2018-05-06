@@ -1,15 +1,15 @@
-export interface Call<Out = any, In = any, Previous = any> {
-  fn: CallFn<In>,
+export interface Call<Resolve = any, In = any, Out = any, Previous = any> {
+  fn: CallFn<In, Out>,
   arg?: In,
-  exec: (arg: In | undefined, finish: Finish<Out>) => void,
-  then: (finish: Finish<Out>) => void,
+  exec: (arg: In | undefined, finish: (result: Exec<Resolve, Out>) => void) => void,
+  then: (finish: Finish<Resolve>) => void,
   previous: Previous,
   thisArg?: any,
   pipe: PipeFn
 }
 
-export interface Operator<In, Out> {
-  <Previous extends Call>(previous: Previous): Call<Out, In, Previous>
+export interface Operator<In, Out, FnOut> {
+  <Previous extends Call>(previous: Previous): Call<Out, In, FnOut, Previous>
 }
 
 export interface CallFn<In = any, Out = any> {
@@ -20,6 +20,17 @@ export interface Finish<Out> {
   (result: Out): void
 }
 
-export interface PipeFn {
-  <In, Out, FnOut, PIn, PP>(this: Call<In, PIn, PP>, next: Operator<In, Out>): Call<Out, In, typeof this>
+export interface ThenArg<Resolve> {
+  resolve: Resolve
 }
+
+export interface Exec<Resolve, Out> {
+  out: Out,
+  resolve: Resolve
+}
+
+export interface PipeFn {
+  <In, Out, FnOut, PIn, PFnOut, PP>(this: Call<In, PIn, PFnOut, PP>, next: Operator<In, Out, FnOut>): Call<Out, In, FnOut, typeof this>
+}
+
+export type InferredCall<T> = T extends Call<infer Resolve, infer In, infer Out, infer Previous> ? Call<Resolve, In, Out, Previous> : any
