@@ -34,3 +34,7 @@ export interface TestArg<Resolve, Out> {
 }
 
 export type InferredCall<T> = T extends Call<infer Resolve, infer In, infer Out, infer Previous> ? Call<Resolve, In, Out, Previous> : any
+export type ResolveOf<T> = T extends Call<infer Resolve> ? Resolve : any
+export type InOf<T> = T extends Call<infer Resolve, infer In> ? In : any
+export type OutOf<T> = T extends Call<infer Resolve, infer In, infer Out> ? Out : any
+export type PreviousOf<T> = T extends Call<infer Resolve, infer In, infer Out, infer Previous> ? Previous : any
