@@ -1,8 +1,8 @@
-import { CallFn, Call, Operator } from './types'
+import { CallFn, Call, Operator, ResolveOf } from './types'
 import { createOperator } from './util'
 
-export function flatMap<In, Resolve, Out, Previous, CIn> (fn: CallFn<In, Call<Resolve, CIn, Out, Previous>>, thisArg?: any): Operator<Resolve, In, Call<Resolve, CIn, Out, Previous>> {
-  return createOperator(fn, thisArg, (previous, finish) => {
-    (fn.call(thisArg, previous) as ReturnType<typeof fn>).exec(finish)
+export function flatMap<In = any, Out extends Call = any> (mapFn: CallFn<In, Out>, thisArg?: any): Operator<ResolveOf<Out>, In, Out> {
+  return createOperator(mapFn, thisArg, (previous, finish) => {
+    (mapFn.call(thisArg, previous) as ReturnType<typeof mapFn>).exec(finish)
   })
 }

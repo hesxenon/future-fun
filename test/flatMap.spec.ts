@@ -1,8 +1,6 @@
 import { double } from './test.util'
-import { call } from '../src/call'
-import { flatMap } from '../src/flatMap'
 import { assert } from 'chai'
-import { map, Call } from '..'
+import { map, Call, call, flatMap, ResolveOf, InOf, InferredCall } from '..'
 
 describe('flatMap', () => {
   it('should be able to pass on the result of a nested call', done => {
@@ -29,6 +27,27 @@ describe('flatMap', () => {
     c.exec(x => {
       assert(x === 1)
       done()
+    })
+  })
+
+  it.only('should be able to take different call signatures as long as they resolve to the same type', done => {
+    const apiCall = (x: number) => Promise.resolve(x + '')
+    const localCall = (x: number) => Promise.resolve(`local: ${x}`)
+    const fetchRemote = (id: number) => call(apiCall, id).pipe(map(x$ => x$.then(x => `remote: ${x}`)))
+    const fetchLocal = (id: number) => call(localCall, id)
+
+    const c = call(x => x, 'remote')
+      .pipe(flatMap(type => type === 'remote' ? fetchRemote(1) : fetchLocal(1)))
+
+    c.test('remote', ({ out }) => {
+      assert(out.previous)
+      if (out.previous) {
+        assert(out.previous.fn === apiCall)
+      }
+    })
+
+    c.test('local', ({ out }) => {
+      assert(out.fn === localCall)
     })
   })
 })
