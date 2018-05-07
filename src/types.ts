@@ -5,11 +5,11 @@ export interface Call<Resolve = any, In = any, Out = any, Previous = any> {
   exec: (cb: ExecCallback<Resolve>) => void,
   previous: Previous,
   thisArg?: any,
-  pipe: <Resolve, In, Out, PIn, POut, PP>(this: Call<In, PIn, POut, PP>, next: Operator<Resolve, In, Out>) => Call<Resolve, In, Out, typeof this>
+  pipe: <Resolve, In, Out, Instance extends this>(this: Call<In, InOf<Instance>, OutOf<Instance>, PreviousOf<Instance>>, next: Operator<Resolve, In, Out>) => Call<Resolve, In, Out, typeof this>
 }
 
 export interface Operator<Resolve, In, Out> {
-  <PI, PO, PP>(previous: Call<In, PI, PO, PP>): Call<Resolve, In, Out, Call<In, PI, PO, PP>>
+  <Previous extends Call>(previous: Call<In, InOf<Previous>, OutOf<Previous>, PreviousOf<Previous>>): Call<Resolve, In, Out, Call<In, InOf<Previous>, OutOf<Previous>, PreviousOf<Previous>>>
 }
 
 export interface CallFn<In = any, Out = any> {
