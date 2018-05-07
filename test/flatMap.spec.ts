@@ -30,7 +30,7 @@ describe('flatMap', () => {
     })
   })
 
-  it.only('should be able to take different call signatures as long as they resolve to the same type', done => {
+  it('should be able to take different call signatures as long as they resolve to the same type', done => {
     const apiCall = (x: number) => Promise.resolve(x + '')
     const localCall = (x: number) => Promise.resolve(`local: ${x}`)
     const fetchRemote = (id: number) => call(apiCall, id).pipe(map(x$ => x$.then(x => `remote: ${x}`)))
