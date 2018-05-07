@@ -1,4 +1,4 @@
-import { double } from './test.util'
+import { double, cscratch } from './test.util'
 import { assert } from 'chai'
 import { map, Call, call, flatMap, ResolveOf, InOf, InferredCall } from '..'
 
@@ -36,6 +36,8 @@ describe('flatMap', () => {
     const fetchRemote = (id: number) => call(apiCall, id).pipe(map(x$ => x$.then(x => `remote: ${x}`)))
     const fetchLocal = (id: number) => call(localCall, id)
 
+    const scratch = cscratch(2, done)
+
     const c = call(x => x, 'remote')
       .pipe(flatMap(type => type === 'remote' ? fetchRemote(1) : fetchLocal(1)))
 
@@ -44,10 +46,12 @@ describe('flatMap', () => {
       if (out.previous) {
         assert(out.previous.fn === apiCall)
       }
+      scratch()
     })
 
     c.test('local', ({ out }) => {
       assert(out.fn === localCall)
+      scratch()
     })
   })
 })
