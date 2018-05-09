@@ -1,11 +1,12 @@
 import { double, cscratch } from './test.util'
 import { assert } from 'chai'
-import { map, Call, call, flatMap, ResolveOf, InOf, InferredCall } from '..'
+import { map, Call, call, flatMap, ResolveOf, InOf, InferredCall, execCall } from '..'
+import { testCall } from '../src/test'
 
 describe('flatMap', () => {
   it('should be able to pass on the result of a nested call', done => {
     const c = call(x => x, 1).pipe(flatMap(x => call(double, x)))
-    c.exec(x => {
+    execCall(c, x => {
       assert(x === 2)
       done()
     })
@@ -20,11 +21,11 @@ describe('flatMap', () => {
     const c = call(x => x, 1)
       .pipe(flatMap(send))
 
-    c.test(2, ({ out }) => {
+    testCall(c, 2, ({ out }) => {
       assert(out.previous.fn === apiCall)
     })
 
-    c.exec(x => {
+    execCall(c, x => {
       assert(x === 1)
       done()
     })
@@ -41,7 +42,7 @@ describe('flatMap', () => {
     const c = call(x => x, 'remote')
       .pipe(flatMap(type => type === 'remote' ? fetchRemote(1) : fetchLocal(1)))
 
-    c.test('remote', ({ out }) => {
+    testCall(c, 'remote', ({ out }) => {
       assert(out.previous)
       if (out.previous) {
         assert(out.previous.fn === apiCall)
@@ -49,7 +50,7 @@ describe('flatMap', () => {
       scratch()
     })
 
-    c.test('local', ({ out }) => {
+    testCall(c, 'local', ({ out }) => {
       assert(out.fn === localCall)
       scratch()
     })

@@ -1,5 +1,5 @@
 import { call } from '../src/call'
-import { map, flatMapPromise } from '..'
+import { map, flatMapPromise, execCall, testCall } from '..'
 import { assert } from 'chai'
 import * as fs from 'fs'
 import { cscratch } from './test.util'
@@ -9,7 +9,7 @@ describe('flatPromise', () => {
     const c = call(x => x, 1)
       .pipe(flatMapPromise(x => Promise.resolve(x + '')))
 
-    c.exec(result => {
+    execCall(c, result => {
       assert(result === '1')
       done()
     })
@@ -21,12 +21,12 @@ describe('flatPromise', () => {
 
     const scratch = cscratch(2, done)
 
-    c.test(Promise.resolve(2), ({ resolve }) => {
+    testCall(c, Promise.resolve(2), ({ resolve }) => {
       assert(resolve === 2)
       scratch()
     })
 
-    c.exec(num => {
+    execCall(c, num => {
       assert(num === 1)
       scratch()
     })
