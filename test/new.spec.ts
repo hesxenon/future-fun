@@ -23,7 +23,7 @@ import { assert } from 'chai'
 // })
 
 interface ICall<In, Out> {
-  chain: <Next>(f: (arg: Out) => ICall<Out, Next>) => ICall<Out, Next>,
+  chain: <Next>(f: (arg: Out) => ICall<Out, Next>) => ICall<{ fn: (arg: In) => Out, arg: In }, ICall<Out, Next>>,
   map: <Next>(f: (arg: Out) => Next) => ICall<Out, Next>,
   exec: () => Out,
   value: () => { fn: (arg: In) => Out, arg: In },
@@ -32,7 +32,7 @@ interface ICall<In, Out> {
 }
 
 const Call: <In, Out>(fn: (arg: In) => Out, arg: In) => ICall<In, Out> = (fn, arg) => ({
-  chain: f => f(fn(arg)),
+  chain: f => Call(({ fn, arg }) => f(fn(arg)), { fn, arg }),
   map: f => Call(f, fn(arg)),
   exec: () => fn(arg),
   value: () => ({ fn, arg }),
@@ -40,25 +40,24 @@ const Call: <In, Out>(fn: (arg: In) => Out, arg: In) => ICall<In, Out> = (fn, ar
 })
 
 describe('Call', () => {
+  const ident = (x: number) => x
+  const double = (x: number) => x * 2
+  const toString = (x: number) => x + ''
+
   it('should work', () => {
-    const ident = (x: number) => x
-    const double = (x: number) => x * 2
-    const toString = (x: number) => x + ''
     const c = Call(ident, 1).map(double)
     const d = Call(ident, 1).chain(x => Call(double, x))
     assert(c.exec() === 2)
-    assert(d.exec() === 2)
-    assert(d.value().fn === double)
-    assert(d.value().arg === 1)
+    assert(d.exec().fn === double)
   })
 
   describe('exec', () => {
-    it('should only execute the last/current call', () => {
+    it('should not execute the callchain on setup', () => {
       let firstCalled = false
       const c = Call(x => {
         firstCalled = true
         return x
-      }, 1).map(x => x * 2)
+      }, 1).chain(x => Call(double, x))
 
       assert(!firstCalled)
     })
