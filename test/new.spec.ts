@@ -23,17 +23,19 @@ import { assert } from 'chai'
 // })
 
 interface ICall<In, Out> {
-  chain: <Next>(f: (arg: Out) => ICall<Out, Next>) => ICall<{ fn: (arg: In) => Out, arg: In }, ICall<Out, Next>>,
-  map: <Next>(f: (arg: Out) => Next) => ICall<Out, Next>,
+  chain: <Next>(f: (arg: Out) => ICall<Out, Next>) => ICall<CallWrap<In, Out>, ICall<Out, Next>>,
+  map: <Next>(f: (arg: Out) => Next) => ICall<CallWrap<In, Out>, Next>,
   exec: () => Out,
   value: () => { fn: (arg: In) => Out, arg: In },
   arg: In,
   fn: (arg: In) => Out
 }
 
+interface CallWrap<In, Out> { fn: (arg: In) => Out, arg: In }
+
 const Call: <In, Out>(fn: (arg: In) => Out, arg: In) => ICall<In, Out> = (fn, arg) => ({
   chain: f => Call(({ fn, arg }) => f(fn(arg)), { fn, arg }),
-  map: f => Call(f, fn(arg)),
+  map: f => Call(({ fn, arg }) => f(fn(arg)), { fn, arg }),
   exec: () => fn(arg),
   value: () => ({ fn, arg }),
   fn, arg
@@ -53,13 +55,20 @@ describe('Call', () => {
 
   describe('exec', () => {
     it('should not execute the callchain on setup', () => {
-      let firstCalled = false
+      let chainFirstCalled = false
       const c = Call(x => {
-        firstCalled = true
+        chainFirstCalled = true
         return x
       }, 1).chain(x => Call(double, x))
 
-      assert(!firstCalled)
+      let mapFirstCalled = false
+      const d = Call(x => {
+        mapFirstCalled = true
+        return x
+      }, 1).map(double)
+
+      assert(!chainFirstCalled)
+      assert(!mapFirstCalled)
     })
   })
 })
