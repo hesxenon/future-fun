@@ -1,4 +1,4 @@
-import { CallFn, Operator, Call, ExecCallback } from './types'
+import { CallFn, Operator, Call } from './types'
 
 export function createOperator<Resolve, In, Out> (fn: CallFn<In, Out>, thisArg: any, exec: Call['exec']): Operator<Resolve, In, Out> {
   return (previous) => ({
