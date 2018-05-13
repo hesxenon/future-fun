@@ -3,11 +3,8 @@ import { assert } from 'chai'
 import { double } from './test.util'
 
 describe('map', () => {
-  it('should execute so that B º A is satisfied', done => {
+  it('should execute so that B º A is satisfied', () => {
     const c = call(x => x, 1).pipe(map(double))
-    execCall(c, x => {
-      assert(x === 2)
-      done()
-    })
+    assert(execCall(c) === 2)
   })
 })

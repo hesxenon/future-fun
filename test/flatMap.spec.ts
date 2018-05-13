@@ -4,15 +4,12 @@ import { map, Call, call, flatMap, ResolveOf, InOf, InferredCall, execCall } fro
 import { testCall } from '../src/test'
 
 describe('flatMap', () => {
-  it('should be able to pass on the result of a nested call', done => {
+  it('should be able to pass on the result of a nested call', () => {
     const c = call(x => x, 1).pipe(flatMap(x => call(double, x)))
-    execCall(c, x => {
-      assert(x === 2)
-      done()
-    })
+    assert(execCall(c) === 2)
   })
 
-  it('should be able to resolve mapped calls', done => {
+  it('should be able to resolve mapped calls', () => {
     const apiCall = (x: number) => x + ''
     const parseResponse = parseInt
 
@@ -21,14 +18,11 @@ describe('flatMap', () => {
     const c = call(x => x, 1)
       .pipe(flatMap(send))
 
-    testCall(c, 2, ({ out }) => {
+    testCall(c, 2, (out) => {
       assert(out.previous.fn === apiCall)
     })
 
-    execCall(c, x => {
-      assert(x === 1)
-      done()
-    })
+    assert(execCall(c) === 1)
   })
 
   it('should be able to take different call signatures as long as they resolve to the same type', done => {
@@ -42,7 +36,7 @@ describe('flatMap', () => {
     const c = call(x => x, 'remote')
       .pipe(flatMap(type => type === 'remote' ? fetchRemote(1) : fetchLocal(1)))
 
-    testCall(c, 'remote', ({ out }) => {
+    testCall(c, 'remote', (out) => {
       assert(out.previous)
       if (out.previous) {
         assert(out.previous.fn === apiCall)
@@ -50,9 +44,14 @@ describe('flatMap', () => {
       scratch()
     })
 
-    testCall(c, 'local', ({ out }) => {
+    testCall(c, 'local', (out) => {
       assert(out.fn === localCall)
       scratch()
     })
+  })
+
+  it('should be able to execute mapped calls', () => {
+    const c = call(x => x, 1).pipe(flatMap(x => call(y => y * 2, x).pipe(map(y => y + ''))))
+    assert(execCall(c) === '2')
   })
 })

@@ -15,13 +15,9 @@ describe('testCall', () => {
     })
   })
 
-  it('should execute the callchain for mapped calls', done => {
+  it('should execute the callchain for mapped calls', () => {
     let firstCalled = false
     const c = call(x => x, 1).pipe(flatMap(x => call(y => y * 2, x).pipe(map(y => y + ''))))
-    testCall(c, 2, ({ resolve }) => {
-      assert(resolve === '4')
-      done()
-    })
-
+    assert(c.exec(2) === '4')
   })
 })
