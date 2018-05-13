@@ -71,4 +71,19 @@ describe('Call', () => {
       assert(!mapFirstCalled)
     })
   })
+
+  describe('map', () => {
+    it('should execute directly to a value', () => {
+      const c = Call(ident, 1).map(double)
+      assert(c.exec() === 2)
+      assert(c.map(double).exec() === 4)
+    })
+  })
+
+  describe('chain', () => {
+    it('should execute directly to a call', () => {
+      const c = Call(ident, 1).chain(x => Call(double, x))
+      assert(c.exec().fn === double)
+    })
+  })
 })
