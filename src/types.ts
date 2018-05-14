@@ -1,5 +1,5 @@
 export interface ICallMonad<In, Out> extends ICall<In, Out> {
-  chain: <_In, Next, Instance extends this>(this: Instance, f: (arg: Out) => ICallMonad<_In, Next>) => ICallMonad<Instance, Next>,
+  chain: <Next, Instance extends this>(this: Instance, f: (arg: Out) => ICallMonad<any, Next>) => ICallMonad<Instance, Next>,
   map: <Next, Instance extends this>(this: Instance, f: (arg: Out) => Next) => ICallMonad<Instance, Next>,
   valueOf: () => Out
 }

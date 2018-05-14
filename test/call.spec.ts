@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { fail } from 'assert'
-import { Call, ICallMonad, OutOf } from '..'
+import { Call, ICallMonad, OutOf, testCall } from '..'
 
 describe('Call', () => {
   const ident = (x: number) => x
@@ -56,6 +56,15 @@ describe('Call', () => {
       assert(b.arg === a)
       assert(c.arg === b)
       assert(c.arg.arg === a)
+    })
+
+    it('should be possible to chain to any call as long as it resolves to the same type', () => {
+      const a = Call(x => x, 1)
+      const f = (x: number) => Call(double, x)
+      const g = (x: number) => Call(ident, x).map(x => x + 1)
+      const b = a.chain(x => x > 1 ? f(x) : g(x))
+      assert(b.fn(Call(x => x, 5)) === 10)
+      assert(b.fn(Call(x => x, 0)) === 1)
     })
   })
 
