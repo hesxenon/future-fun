@@ -1,5 +1,4 @@
 import { assert } from 'chai'
-import { pipe } from 'ramda'
 import { fail } from 'assert'
 
 interface ICallMonad<In, Resolve> extends ICall<In, Resolve> {
