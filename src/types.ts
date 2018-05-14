@@ -1,7 +1,7 @@
-export interface ICallMonad<In, Resolve> extends ICall<In, Resolve> {
-  chain: <_In, Next, Instance extends this>(this: Instance, f: (arg: Resolve) => ICallMonad<_In, Next>) => ICallMonad<Instance, Next>,
-  map: <Next, Instance extends this>(this: Instance, f: (arg: Resolve) => Next) => ICallMonad<Instance, Next>,
-  valueOf: () => Resolve
+export interface ICallMonad<In, Out> extends ICall<In, Out> {
+  chain: <_In, Next, Instance extends this>(this: Instance, f: (arg: Out) => ICallMonad<_In, Next>) => ICallMonad<Instance, Next>,
+  map: <Next, Instance extends this>(this: Instance, f: (arg: Out) => Next) => ICallMonad<Instance, Next>,
+  valueOf: () => Out
 }
 
 export type InOf<C> = C extends ICall<infer In, infer Out> ? In : any
