@@ -1,5 +1,6 @@
 import { assert } from 'chai'
 import { pipe } from 'ramda'
+import { fail } from 'assert'
 
 interface ICallMonad<In, Resolve> extends ICall<In, Resolve> {
   chain: <_In, Next, Instance extends this>(this: Instance, f: (arg: Resolve) => ICallMonad<_In, Next>) => ICallMonad<Instance, Next>,
@@ -99,24 +100,32 @@ describe('Call', () => {
     })
   })
 
-  describe('testCall', () => {
+  describe('testing', () => {
     it('should simply execute the calls fn with the passed argument', () => {
       const toTest = Call(ident, 1 as number).map(double).map(toString)
       const setup = Call(ident, 2 as number).map(double)
       assert(toTest.fn(setup) === '4')
     })
 
-    // it('should be possible to test flows by passing Call Monads into the fn of a Call', () => {
-    //   // assume these are functions from your program
-    //   const fetchDb = (id: number) => Call(id => Promise.resolve(id + ''), id)
-    //   const upload = (data: string) => Call(data => Promise.resolve({ received: true, data }), data)
-    //   const fetchAndUpload = pipe(fetchDb, upload)
+    it('should be possible to test flows by passing Call Monads into the fn of a Call', () => {
+      // assume these are functions from your program
+      const fetchDb = (id: number) => Call(id => {
+        fail('the real fetchDb function should never be called since we\'re testing with a fake call!')
+        return Promise.resolve(id + '')
+      }, id)
+      const upload = (data: string) => Call(data => Promise.resolve({ received: data.length < 3, data }), data)
 
-    //   fetchAndUpload(5).fn(Call(x => Promise.resolve(x + ''), 10))
-    //     .then(result => result.valueOf())
-    //     .then(({ data }) => {
-    //       assert(data === '10')
-    //     })
-    // })
+      const fetchAndUpload = (x: number) => fetchDb(x).map(data$ => data$.then(data => upload(data).valueOf()))
+
+      const mockFetchDb = (id: number) => Call(id => Promise.resolve(id + ''), id)
+      fetchAndUpload(5).fn(mockFetchDb(10)).then(({ data, received }) => {
+        assert(data === '10')
+        assert(received)
+      })
+
+      fetchAndUpload(5).fn(mockFetchDb(1000)).then(({ received }) => [
+        assert(!received)
+      ])
+    })
   })
 })
