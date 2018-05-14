@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { fail } from 'assert'
-import { Call } from '..'
+import { Call, ICallMonad, OutOf } from '..'
 
 describe('Call', () => {
   const ident = (x: number) => x
@@ -23,6 +23,11 @@ describe('Call', () => {
 
       assert(!chainFirstCalled)
       assert(!mapFirstCalled)
+    })
+
+    it('should execute the whole callchain on valueOf()', () => {
+      const c = Call(x => x, 1).map(x => x * 2).chain(x => Call(x => x + '', x))
+      assert(c.valueOf() === '2')
     })
   })
 
@@ -72,35 +77,6 @@ describe('Call', () => {
       const f = (x: number) => Call(double, x)
       const g = (x: number) => Call(x => x + 1, x)
       assert(c.chain(f).chain(g).valueOf() === c.chain(x => f(x).chain(g)).valueOf())
-    })
-  })
-
-  describe('testing', () => {
-    it('should simply execute the calls fn with the passed argument', () => {
-      const toTest = Call(ident, 1 as number).map(double).map(toString)
-      const setup = Call(ident, 2 as number).map(double)
-      assert(toTest.fn(setup) === '4')
-    })
-
-    it('should be possible to test flows by passing Call Monads into the fn of a Call', () => {
-      // assume these are functions from your program
-      const fetchDb = (id: number) => Call(id => {
-        fail('the real fetchDb function should never be called since we\'re testing with a fake call!')
-        return Promise.resolve(id + '')
-      }, id)
-      const upload = (data: string) => Call(data => Promise.resolve({ received: data.length < 3, data }), data)
-
-      const fetchAndUpload = (x: number) => fetchDb(x).map(data$ => data$.then(data => upload(data).valueOf()))
-
-      const mockFetchDb = (id: number) => Call(id => Promise.resolve(id + ''), id)
-      fetchAndUpload(5).fn(mockFetchDb(10)).then(({ data, received }) => {
-        assert(data === '10')
-        assert(received)
-      })
-
-      fetchAndUpload(5).fn(mockFetchDb(1000)).then(({ received }) => [
-        assert(!received)
-      ])
     })
   })
 })
