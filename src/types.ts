@@ -7,4 +7,4 @@ export interface ICallMonad<In, Resolve> extends ICall<In, Resolve> {
 export type InOf<C> = C extends ICall<infer In, infer Out> ? In : any
 export type OutOf<C> = C extends ICall<infer In, infer Out> ? Out : any
 
-export interface ICall<In, Out> { fn: (arg: In) => Out, arg: In }
+export interface ICall<In, Out> { fn: (arg: In) => Out, arg: In, thisArg?: any }
