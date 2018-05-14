@@ -1,22 +1,10 @@
-export interface Call<Resolve = any, In = any, Out = any, Previous = any> {
-  fn: CallFn<In, Out>,
-  arg?: In,
-  exec: CallFn<In, { resolve: Resolve, out: Out }>,
-  previous: Previous,
-  thisArg?: any,
-  pipe: <Resolve, In, Out, Instance extends this>(this: Call<In, InOf<Instance>, OutOf<Instance>, PreviousOf<Instance>>, next: Operator<Resolve, In, Out>) => Call<Resolve, In, Out, typeof this>
+export interface ICallMonad<In, Resolve> extends ICall<In, Resolve> {
+  chain: <_In, Next, Instance extends this>(this: Instance, f: (arg: Resolve) => ICallMonad<_In, Next>) => ICallMonad<Instance, Next>,
+  map: <Next, Instance extends this>(this: Instance, f: (arg: Resolve) => Next) => ICallMonad<Instance, Next>,
+  valueOf: () => Resolve
 }
 
-export interface Operator<Resolve, In, Out> {
-  <Previous extends Call>(previous: Call<In, InOf<Previous>, OutOf<Previous>, PreviousOf<Previous>>): Call<Resolve, In, Out, Call<In, InOf<Previous>, OutOf<Previous>, PreviousOf<Previous>>>
-}
+export type InOf<C> = C extends ICall<infer In, infer Out> ? In : any
+export type OutOf<C> = C extends ICall<infer In, infer Out> ? Out : any
 
-export interface CallFn<In = any, Out = any> {
-  (arg: In): Out
-}
-
-export type InferredCall<T> = T extends Call<infer Resolve, infer In, infer Out, infer Previous> ? Call<Resolve, In, Out, Previous> : any
-export type ResolveOf<T> = T extends Call<infer Resolve> ? Resolve : any
-export type InOf<T> = T extends Call<infer Resolve, infer In> ? In : any
-export type OutOf<T> = T extends Call<infer Resolve, infer In, infer Out> ? Out : any
-export type PreviousOf<T> = T extends Call<infer Resolve, infer In, infer Out, infer Previous> ? Previous : any
+export interface ICall<In, Out> { fn: (arg: In) => Out, arg: In }
