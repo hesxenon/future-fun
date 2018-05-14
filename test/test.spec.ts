@@ -1,6 +1,6 @@
 import { Call } from '..'
 import { assert } from 'chai'
-import { testCall } from '../src/testing'
+import { testCall } from '../src/test'
 import { fail } from 'assert'
 
 describe('testCall', () => {
@@ -23,5 +23,13 @@ describe('testCall', () => {
 
     const x = Call(x => x, 1).chain(x => Call(x => x * 2, x)).chain(x => Call(x => x + '', x))
     assert(testCall(x.arg, 2) === 4)
+  })
+
+  it('should not execute the previous calls', () => {
+    const c = Call(x => {
+      fail('this should not be called!')
+      return x
+    }, 1).map(x => x * 2)
+    assert(testCall(c, 2) === 4)
   })
 })
