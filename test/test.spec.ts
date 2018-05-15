@@ -1,7 +1,8 @@
-import { Call } from '..'
+import { Call, IChainedCallMonad, ICallMonad, IMappedCallMonad } from '..'
 import { assert } from 'chai'
 import { testCall } from '../src/test'
 import { fail } from 'assert'
+import { double, increment } from './test.util'
 
 describe('testCall', () => {
   it('should simply execute the calls fn with the passed argument', () => {
@@ -22,7 +23,7 @@ describe('testCall', () => {
     const mockFetchDb = (id: number) => Call(id => Promise.resolve(id + ''), id)
 
     const x = Call(x => x, 1).chain(x => Call(x => x * 2, x)).chain(x => Call(x => x + '', x))
-    assert(testCall(x.arg, 2) === 4)
+    assert(testCall(x.arg, 2).valueOf() === 4)
   })
 
   it('should not execute the previous calls', () => {
@@ -30,6 +31,16 @@ describe('testCall', () => {
       fail('this should not be called!')
       return x
     }, 1).map(x => x * 2)
-    assert(testCall(c, 2) === 4)
+    assert(testCall(c, 2).valueOf() === 4)
+  })
+
+  it('should return the Call of the mapping function for chained calls', () => {
+    const c = Call(x => x, 1).chain(x => Call(double, x))
+    assert(testCall(c, 2).fn === double)
+  })
+
+  it('should return the result of the mapping function for mapped calls', () => {
+    const c = Call(x => x, 1).map(x => x + '')
+    assert(testCall(c, 3) === '3')
   })
 })
