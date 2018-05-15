@@ -1,12 +1,9 @@
 import { assert } from 'chai'
 import { fail } from 'assert'
 import { Call, ICallMonad, OutOf, testCall } from '..'
+import { double, ident } from './test.util'
 
 describe('Call', () => {
-  const ident = (x: number) => x
-  const double = (x: number) => x * 2
-  const toString = (x: number) => x + ''
-
   describe('exec', () => {
     it('should not execute the callchain on setup', () => {
       let chainFirstCalled = false
