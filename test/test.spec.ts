@@ -2,7 +2,7 @@ import { Call, IChainedCallMonad, ICallMonad, IMappedCallMonad } from '..'
 import { assert } from 'chai'
 import { testCall } from '../src/test'
 import { fail } from 'assert'
-import { double, increment } from './test.util'
+import { double, increment, stringify } from './test.util'
 
 describe('testCall', () => {
   it('should simply execute the calls fn with the passed argument', () => {
@@ -42,5 +42,13 @@ describe('testCall', () => {
   it('should return the result of the mapping function for mapped calls', () => {
     const c = Call(x => x, 1).map(x => x + '')
     assert(testCall(c, 3) === '3')
+  })
+
+  it('should be possible to test the function of a chained nested call', () => {
+    const doubleString = (x: number) => Call(double, x).map(stringify)
+    const c = Call(x => x, 1).chain(doubleString)
+    const tc = testCall(c, 2)
+    assert(tc.mapFn === stringify)
+    assert(tc.arg.fn === double)
   })
 })
