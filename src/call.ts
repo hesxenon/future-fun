@@ -1,4 +1,4 @@
-import { ICallMonad, InOf, OutOf } from '..'
+import { ICallMonad, InOf, OutOf, ILift } from '..'
 
 /**
  * @deprecated - use Call.of instead
@@ -24,7 +24,7 @@ export function Call<In, Out> (fn: (arg: In) => Out, arg: In, thisArg?: any): IC
 }
 
 export namespace Call {
-  export const of = Call
+  export const of: ILift = Call
   export const all = _all
 }
 

@@ -12,6 +12,10 @@ export interface IMappedCallMonad<Instance extends ICallMonad<any, any>, Out> ex
   mapFn: MapFn<OutOf<Instance>, Out>
 }
 
+export interface ILift {
+  <In, Out>(fn: (arg: In) => Out, arg: In): ICallMonad<In, Out>
+}
+
 export type InOf<C> = C extends ICall<infer In, infer Out> ? In : any
 export type OutOf<C> = C extends ICall<infer In, infer Out> ? Out : any
 
