@@ -38,6 +38,8 @@ assert(call.arg.fn(Call(x => x, 2)) === 4) // execute the function of action B. 
 
 Because this can get very complicated very fast, the `testCall` utility can come in handy. This utility takes any call and the direct argument to the last monad, lifts these ingredients into a new call and executes it without touching the previous actions of the call.
 
+For more complicated scenarios see [demo.spec.ts](./test/demo.spec.ts) (WIP)
+
 # API
 ## Call
 _Create a new `ICallMonad` from scratch a.k.a. lift/of_
