@@ -1,8 +1,4 @@
+export const ident = (x: number) => x
 export const double = (x: number) => x * 2
-
-export const cscratch = (x: number, after: () => void) => () => {
-  x--
-  if (x === 0) {
-    after()
-  }
-}
+export const increment = (x: number) => x + 1
+export const stringify = (x: number) => x + ''

@@ -1,10 +1,15 @@
-import { CallFn, Call, Operator } from './types'
-import { pipe } from './util'
+import { ICallMonad } from '..'
 
-export function call<Resolve, In> (fn: CallFn<In, Resolve>, arg: In, thisArg?: any): Call<Resolve, In, Resolve, undefined> {
-  return {
-    fn, arg, previous: undefined, thisArg,
-    exec: (previous: In, cb) => cb(fn.call(thisArg, previous)),
-    pipe
-  }
-}
+export const Call: <In, Out>(fn: (arg: In) => Out, arg: In, thisArg?: any) => ICallMonad<In, Out> = (fn, arg, thisArg) => ({
+  chain: function (f) {
+    return Object.assign(Call((previous) => {
+      const mappedCall = f(previous.valueOf())
+      return mappedCall.fn(mappedCall.arg)
+    }, this), { chainFn: f })
+  },
+  map: function (f) {
+    return Object.assign(Call((previous) => f(previous.valueOf()), this), { mapFn: f })
+  },
+  valueOf: () => fn.call(thisArg, arg),
+  fn, arg, thisArg
+})
