@@ -7,7 +7,7 @@
     "test": "npm run build && mocha",
     "build": "tsc",
     "build:w": "tsc -w",
-    "prepack": "npm run test",
+    "prepare": "npm run test",
     "lint": "tslint -p ."
   },
   "repository": {
