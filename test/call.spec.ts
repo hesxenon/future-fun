@@ -65,6 +65,20 @@ describe('Call', () => {
     })
   })
 
+  describe('all', () => {
+    const object = {}
+    const a = Call(x => x, '1')
+    const b = Call(x => x, 1)
+    const c = Call(x => x, object)
+
+    it('should be possible to aggregate an array of calls into a single call with all results', () => {
+      const [str, num, obj] = Call.all(a, b, c).valueOf()
+      assert(str === '1')
+      assert(num === 1)
+      assert(obj === object)
+    })
+  })
+
   describe('identity laws', () => {
     const unit = (x: number) => Call(ident, x)
     it('should satisfy left identity', () => {
