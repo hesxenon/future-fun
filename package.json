@@ -10,12 +10,18 @@
     "prepack": "npm run test",
     "lint": "tslint -p ."
   },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/hesxenon/future-fun.git"
+  },
   "keywords": [
     "thunk",
     "call",
     "callify",
     "unit testing",
-    "future computation"
+    "future computation",
+    "tdd", "test driven development",
+    "bdd", "behaviour driven development"
   ],
   "author": "dpot",
   "license": "MIT",
