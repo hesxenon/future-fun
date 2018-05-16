@@ -41,10 +41,10 @@ Because this can get very complicated very fast, the `testCall` utility can come
 For more complicated scenarios see [demo.spec.ts](./test/demo.spec.ts) (WIP)
 
 # API
-## Call
+## Call / Call.of
 _Create a new `ICallMonad` from scratch a.k.a. lift/of_
 ```typescript
-Call: <In, Out>(fn: (arg: In) => Out, arg: In, thisArg?: any) => ICallMonad<In, Out>
+Call.of: <In, Out>(fn: (arg: In) => Out, arg: In, thisArg?: any) => ICallMonad<In, Out>
 ```
 ### Input
 * `fn` - any function that takes a single argument of type `In` and produces some output of type `Out`
@@ -53,6 +53,22 @@ Call: <In, Out>(fn: (arg: In) => Out, arg: In, thisArg?: any) => ICallMonad<In, 
 
 ### Output
 An `ICallMonad<In, Out>` representing the `fn` and `arg` as well as the context that enables you to `.map` and `.chain` your functions
+
+##### note: don't use `Call` directly anymore as it's deprecated. Use `Call.of` instead
+
+---
+
+## Call.all
+_aggregate any number of calls into a single call_
+```typescript
+Call.all: (...calls: ICallMonad<any, any>[]): ICallMonad<any, any[]>
+```
+### Input
+* `...calls` - the `ICallMonad`s to aggregate
+### Output
+A new `ICallMonad` that takes all the passed calls as its argument and returns all their results if executed
+
+##### note: currently typesafe for up to five calls
 
 ---
 
