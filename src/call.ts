@@ -28,22 +28,6 @@ export namespace Call {
   export const all = _all
 }
 
-interface Wrap<T> {
-  v: T
-}
-
-function wrap<T> (v: T): Wrap<T> {
-  return { v }
-}
-
-function demo<T1> (v1: T1): Wrap<[T1]>
-function demo<T1, T2> (v1: T1, v2: T2): Wrap<[Wrap<T1>, Wrap<T2>]>
-function demo (...input: any[]): Wrap<Wrap<any>[]> {
-  return wrap(input.map(wrap))
-}
-
-const x = demo(1, '')
-
 type M = ICallMonad<any, any>
 
 function _all<M1 extends M> (m1: M1): ICallMonad<[M1], OutOf<M1>>
