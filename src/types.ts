@@ -1,12 +1,19 @@
 export interface ICallMonad<In, Out> {
-  fn: UnaryFunction<In, Out>
-  map: <Instance extends M, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IHasPrevious<Out, Next, Instance>,
-  chain: <Instance extends M, Next extends ICallMonad<Out, any>>(this: Instance, next: Next) => IHasPrevious<Out, OutOf<Next>, Instance>
-  with: (arg: In) => Out
+  with: UnaryFunction<In, Out>
+  map: <Instance extends M, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IMappedCallMonad<In, Next, Instance>,
+  chain: <Instance extends M, Next extends ICallMonad<Out, any>>(this: Instance, next: Next) => IChainedCallMonad<In, Next, Instance>
 }
 
-export interface IHasPrevious<In, Out, Previous> extends ICallMonad<In, Out> {
+export interface IHasPrevious<Previous> {
   previous: Previous
+}
+
+export interface IMappedCallMonad<In, Out, Previous extends M> extends ICallMonad<In, Out>, IHasPrevious<Previous> {
+  morphism: UnaryFunction<OutOf<Previous>, Out>
+}
+
+export interface IChainedCallMonad<In, Chained extends M, Previous extends M> extends ICallMonad<In, OutOf<Chained>>, IHasPrevious<Previous> {
+  chained: Chained
 }
 
 export interface ILift {
@@ -22,7 +29,9 @@ export interface IAll {
   (...calls: M[]): ICallMonad<any[], any[]>
 }
 
-export type UnaryFunction<In = any, Out = any> = (arg: In) => Out
+export interface UnaryFunction<In, Out> {
+  (arg: In): Out
+}
 export type M = ICallMonad<any, any>
 
 export type InOf<C> = C extends ICallMonad<infer In, infer Out> ? In : any
