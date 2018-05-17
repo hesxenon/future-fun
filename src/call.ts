@@ -3,7 +3,7 @@ import { ILift, IAll, M, OutOf } from './types'
 export namespace Call {
   export const of: ILift = function (fn) {
     return {
-      value: fn,
+      fn,
       map: function (morphism) {
         return Object.assign(Call.of((arg) => morphism(this.with(arg))), { previous: this })
       },

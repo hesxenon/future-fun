@@ -1,5 +1,5 @@
 export interface ICallMonad<In, Out> {
-  value: UnaryFunction<In, Out>
+  fn: UnaryFunction<In, Out>
   map: <Instance extends M, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IHasPrevious<Out, Next, Instance>,
   chain: <Instance extends M, Next extends ICallMonad<Out, any>>(this: Instance, next: Next) => IHasPrevious<Out, OutOf<Next>, Instance>
   with: (arg: In) => Out
