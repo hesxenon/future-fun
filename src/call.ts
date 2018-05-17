@@ -1,33 +1,22 @@
-import { ICallMonad, ILift, IAll } from '..'
-
-/**
- * @deprecated - use Call.of instead
- * Lift the function and its argument (as the value) into the monadic context
- * @param fn the function to be called
- * @param arg the argument of {fn}
- * @param thisArg an optional object to call the {fn} optional
- */
-export function Call<In, Out> (fn: (arg: In) => Out, arg: In, thisArg?: any): ICallMonad<In, Out> {
-  return {
-    chain: function (f) {
-      return Object.assign(Call.of((previous) => {
-        const mappedCall = f(previous.valueOf())
-        return mappedCall.fn(mappedCall.arg)
-      }, this), { chainFn: f })
-    },
-    map: function (f) {
-      return Object.assign(Call.of((previous) => f(previous.valueOf()), this), { mapFn: f })
-    },
-    valueOf: () => fn.call(thisArg, arg),
-    fn, arg, thisArg
-  }
-}
+import { IAll, ILift, M } from './types'
 
 export namespace Call {
-  export const of: ILift = Call
-  export const all: IAll = _all
-}
+  export const of: ILift = function (fn, thisArg?) {
+    return {
+      fn,
+      with: function (arg) {
+        return fn.call(thisArg, arg)
+      },
+      map: function (morphism) {
+        return Object.assign(Call.of((arg) => morphism(this.with(arg))), { previous: this, morphism })
+      },
+      chain: function (chained) {
+        return Object.assign(Call.of((arg) => chained.with(this.with(arg))), { previous: this, chained })
+      }
+    }
+  }
 
-function _all (...calls: ICallMonad<any, any>[]): ICallMonad<any, any> {
-  return Call.of(calls => calls.map(call => call.valueOf()), calls)
+  export const all: IAll = function (...calls: M[]): M {
+    return Call.of((args: any[]) => calls.map((call, i) => call.with(args[i])))
+  }
 }

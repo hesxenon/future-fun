@@ -21,47 +21,44 @@ const storage = {}
 function save(num: number) {
   const id = Object.keys(storage).length
   storage[id] = num
-  return Call(({id, num}) => Promise.resolve({id, num}), {id, num})
+  return Promise.resolve({id, num})
 }
 
-const call = Call(x => x, 1) // lift the function and its argument into the monad, this is the first "action" (let's call it A)
+const call = Call.of(x => x) // lift the function and its argument into the monad, this is the first "action" (let's call it A)
   .map(x => x * 2) // map the result of the previous action A to a new result, this represents action B
-  .chain(save) // chain the result with the Call returned from save, this is action C
+  .chain(Call.of(save)) // chain the result with the Call returned from save, this is action C
 ```
 Now `call` is a list of actions `A`, `B` and `C`. This is a very simple example but it shows how to create a flow for your data. The resulting `call` returns a `Promise<{id: number, num: number}>`, and takes the result of the previous action `B` as its argument. This is important because through that we can test how each function behaves:
 ```typescript
 // test A
-assert(call.previous.previous.fn(2) === 2) // we execute the function of action A with an argument of 2. This should return the same number
+assert(testCall(call.previous.previous, 2) === 2) // we execute the function of action A with an argument of 2. This should return the same number
 // test B
-assert(call.arg.fn(Call(x => x, 2)) === 4) // execute the function of action B. B already takes an `ICallMonad<number, number>` as an argument
+assert(testCall(call.previous, 2) === 4) // execute the function of action B with 2, which should double the number
 ```
 
-Because this can get very complicated very fast, the `testCall` utility can come in handy. This utility takes any call and the direct argument to the last monad, lifts these ingredients into a new call and executes it without touching the previous actions of the call.
+This does not look too different compared to the regular execution with `with`, but the very important difference is that `testCall` does not touch any action before the passed call, so with this it is possible to individually and independently test each action of a call.
 
 For more complicated scenarios see [demo.spec.ts](./test/demo.spec.ts) (WIP)
 
 # API
-## Call / Call.of
+## Call.of
 _Create a new `ICallMonad` from scratch a.k.a. lift/of_
 ```typescript
-Call.of: <In, Out>(fn: (arg: In) => Out, arg: In, thisArg?: any) => ICallMonad<In, Out>
+Call.of: <In, Out>(fn: (arg: In) => Out, thisArg?: any) => ICallMonad<In, Out>
 ```
 ### Input
 * `fn` - any function that takes a single argument of type `In` and produces some output of type `Out`
-* `arg` - the argument to call the passed `fn` with
 * `thisArg?` - an optional argument on which `fn` will be called. Necessary if you want to pass a function from a certain object i.e. `Promise.resolve` needs `Promise` as `thisArg`
 
 ### Output
-An `ICallMonad<In, Out>` representing the `fn` and `arg` as well as the context that enables you to `.map` and `.chain` your functions
-
-##### note: don't use `Call` directly anymore as it's deprecated. Use `Call.of` instead
+An `ICallMonad<In, Out>` representing the `fn` as well as the context that enables you to `.map` and `.chain` your `fn`
 
 ---
 
 ## Call.all
 _aggregate any number of calls into a single call_
 ```typescript
-Call.all: (...calls: ICallMonad<any, any>[]): ICallMonad<any, any[]>
+Call.all: (...calls: ICallMonad<any, any>[]): ICallMonad<any[], any[]>
 ```
 ### Input
 * `...calls` - the `ICallMonad`s to aggregate
@@ -75,15 +72,16 @@ A new `ICallMonad` that takes all the passed calls as its argument and returns a
 ## Call.map
 _Map the monads value to another value: M(a) => M(b)_
 ```typescript
-Call.map: <Next, Instance extends this>(this: Instance, f: (arg: Out) => Next) => ICallMonad<Instance, Next>
+Call.map: <Instance extends M, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IMappedCallMonad<In, Next, Instance>
 ```
 ### Input
-* `f` - the mapping function, takes the `Out` value of the `ICallMonad<In, Out>` it is called on and produces a new value. This is the standard `F(a) -> F(b)` morphism.
+* `morphism` - the mapping function, takes the `Out` value of the `ICallMonad<In, Out>` it is called on as  its argument and produces a new value. This is the standard `F(a) -> F(b)` morphism.
 ### Output
-Another `ICallMonad<Instance, Out>` where `Instance` is the instance of the `ICallMonad<In, Out>` that `.map` was called on. This means that the resulting `ICallMonad` takes the previous `ICallMonad` as its argument: 
+Another `IMappedCallMonad<In, Out, Instance>` where `Instance` is the instance of the `ICallMonad<In, Out>` that `.map` was called on. This means that the resulting `IMappedCallMonad` takes the result of the previous `ICallMonad` as its argument.
+### Example
 ```typescript 
 const a = Call(x => x, 1)
-const b = a.map(x => x * 2) // typeof b === ICallMonad<ICallMonad<number, number>, number>
+const b = a.map(x => x * 2)
 ```
 
 ---
@@ -91,21 +89,21 @@ const b = a.map(x => x * 2) // typeof b === ICallMonad<ICallMonad<number, number
 ## Call.chain
 _Map the monads value to the output of another monad: M(M(a)) -> M(b)_
 ```typescript
-Call.chain: <_In, Next, Instance extends this>(this: Instance, f: (arg: Out) => ICallMonad<_In, Next>) => ICallMonad<Instance, Next>
+Call.chain: <Instance extends M, Next extends ICallMonad<Out, any>>(this: Instance, next: Next) => IChainedCallMonad<In, Next, Instance>
 ```
 ### Input
-* `f` - a function that, again, takes the `Out` value of the monad it was called on and returns an `ICallMonad<_In, Next>`. `_In` being an arbitrary inferred type and `Next` being the type the returned monad produces.
+* `next` - Another instance of `ICallMonad<any, any>`
 ### Output
-_see Call.map.Output_
+Another `IChainedCallMonad<In, Next, Instance>` where `Instance` is the instance that `.chain` was called on. The given call instance also takes the result of the previous call as its argument.
 
 ---
 
-## Call.valueOf
+## Call.with
 _Unwrap the monads value: M(a) -> a_
 ```typescript
-Call.valueOf: () => Out
+Call.with: (arg: In) => Out
 ```
 ### Input
-_no input parameters_
+the parameter of the FIRST call in the callchain.
 ### Output
 The final value after running through the entire list of actions as defined
