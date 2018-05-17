@@ -1,33 +1,67 @@
 import { fail } from 'assert'
 import { assert } from 'chai'
 import { Call } from '..'
+import { double, ident, stringify } from './test.util'
 import { testCall } from '../src/test'
 
-describe('testCall', () => {
+describe('demo', () => {
   it('should fetch list of user and aggregate avatar ', () => {
     const str = 'dan'
-    const fetchDb = () => Call(() => {
+    const fetchDb = Call.of((_: undefined) => {
       fail('the real fetchDb function should never be called since we\'re testing with a fake call!')
       return Promise.resolve(mockUser)
-    }, undefined)
+    })
 
-    const fetchAvatar = (user: IUser) => Call(({ id }) => {
+    const fetchAvatar = Call.of(({ id }: IUser) => {
       fail('the real fetchAvatar function should never be called since we\'re testing with a fake call!')
       return Promise.resolve('b64://img/' + id)
-    }, user)
+    })
 
-    const c = (x: string) => fetchDb().map(x$ => x$.then((users) => {
-      return users.filter(({ name }) => name.startsWith(str))
-        .map(u => fetchAvatar(u)
+    const fetchAndFilter = (filter: string) => fetchDb.map(x$ => x$.then((users) => {
+      return users.filter(({ name }) => name.startsWith(filter))
+        .map(u => fetchAvatar
           .map(av$ => av$.then((avatar) => {
             return u.name + avatar
           })))
     }))
-    const tc = testCall(c(str), Promise.resolve(mockUser))
+    const c = fetchAndFilter(str)
     const countOfExpectedCalls = mockUser.filter(({ name }) => name.startsWith(str)).length
-    tc.then(avatarCalls => {
-      assert(avatarCalls.length === countOfExpectedCalls)
-    })
+
+    testCall(c, Promise.resolve(mockUser))
+      .then(avatarCalls => {
+        assert(avatarCalls.length === countOfExpectedCalls)
+      })
+  })
+
+  it('should simply execute the calls fn with the passed argument', () => {
+    const toTest = Call.of(ident).map(x => x * 2).map(x => x + '')
+    assert(testCall(toTest, 2) === '2')
+  })
+
+  it('should not execute the previous calls', () => {
+    const c = Call.of((x: number) => {
+      fail('this should not be called!')
+      return x
+    }).map(double)
+    assert(testCall(c, 2) === 4)
+  })
+
+  it('should return the result of the chained call', () => {
+    const c = Call.of(ident).chain(Call.of(double))
+    assert(testCall(c, 1) === 2)
+  })
+
+  it('should return the result of the mapping function for mapped calls', () => {
+    const c = Call.of(ident).map(stringify)
+    assert(testCall(c, 3) === '3')
+  })
+
+  it('should be possible to test the function of a chained nested call', () => {
+    const doubleString = Call.of(double).map(stringify)
+    const c = Call.of(ident).chain(doubleString)
+    assert(testCall(c, 2) === '4')
+    assert(c.chained.morphism === stringify)
+    assert(c.chained.previous.with === double)
   })
 })
 
