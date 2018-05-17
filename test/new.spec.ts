@@ -5,7 +5,7 @@ interface ICallMonad<In, Out> {
   value: UnaryFunction<In, Out>
   flatten: <Instance extends M>(this: Instance) => typeof this['value']
   map: <Instance extends M, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IHasPrevious<Out, Next, Instance>,
-  chain: <Instance extends M, Next extends M>(this: Instance, morphism: UnaryFunction<Out, Next>) => IHasPrevious<Out, OutOf<Next>, Instance>
+  chain: <Instance extends M, Next extends M>(this: Instance, next: Next) => IHasPrevious<Out, OutOf<Next>, Instance>
   with: (arg: In) => Out
 }
 
@@ -40,8 +40,8 @@ namespace Call {
       map: function (morphism) {
         return Object.assign(Call.of((arg) => morphism(this.with(arg))), { previous: this })
       },
-      chain: function (morphism) {
-        return Object.assign(Call.of((arg) => morphism(this.with(arg)).with(arg)), { previous: this })
+      chain: function (next) {
+        return Object.assign(Call.of((arg) => next.with(arg)), { previous: this })
       },
       with: function (arg) {
         return fn(arg)
@@ -57,18 +57,24 @@ namespace Call {
 describe('call', () => {
   it('should work', () => {
     const a = Call.of(ident)
-    const b = a.map(stringify)
-    const c = Call.of((x: Object) => x)
     assert(a.flatten() === ident)
     assert(a.map(double).with(2) === 4)
-    assert(a.chain(x => Call.of(double)).with(2) === 4)
-    assert(b.previous === a)
-    assert(b.with(2) === '2')
-    assert(b.previous.with(2) === 2)
-    const [first, second] = Call.all(a, b).with([1, 2])
-    assert(first === 1)
-    assert(second === '2')
-    const d = Call.all(a, b, c)
-    const [num, str, obj] = d.with([1, 2, []])
+    assert(a.chain(Call.of(double)).with(2) === 4)
+
+    const b = Call.of(stringify)
+    const all = Call.all(a, b, a.map(double))
+    const [num, str, num2] = all.with([1, 2, 2])
+    assert(num === 1)
+    assert(str === '2')
+    assert(num2 === 4)
+
+    const d = a.map(stringify)
+    assert(d.with(2) === '2')
+    assert(d.previous === a)
+    assert(d.previous.with(2) === 2)
+
+    const e = a.chain(Call.of(double))
+    assert(e.previous === a)
+    assert(e.with(2) === 4)
   })
 })
