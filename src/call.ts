@@ -1,17 +1,14 @@
-import { ILift, IAll, M, OutOf } from './types'
+import { IAll, ILift, M } from './types'
 
 export namespace Call {
   export const of: ILift = function (fn) {
     return {
-      fn,
+      with: fn,
       map: function (morphism) {
-        return Object.assign(Call.of((arg) => morphism(this.with(arg))), { previous: this })
+        return Object.assign(Call.of((arg) => morphism(this.with(arg))), { previous: this, morphism })
       },
-      chain: function (next) {
-        return Object.assign(Call.of((arg) => next.with(this.with(arg))), { previous: this })
-      },
-      with: function (arg) {
-        return fn(arg)
+      chain: function (chained) {
+        return Object.assign(Call.of((arg) => chained.with(this.with(arg))), { previous: this, chained })
       }
     }
   }
