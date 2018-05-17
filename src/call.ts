@@ -1,9 +1,12 @@
 import { IAll, ILift, M } from './types'
 
 export namespace Call {
-  export const of: ILift = function (fn) {
+  export const of: ILift = function (fn, thisArg?) {
     return {
-      with: fn,
+      fn,
+      with: function (arg) {
+        return fn.call(thisArg, arg)
+      },
       map: function (morphism) {
         return Object.assign(Call.of((arg) => morphism(this.with(arg))), { previous: this, morphism })
       },

@@ -1,4 +1,5 @@
 export interface ICallMonad<In, Out> {
+  fn: UnaryFunction<In, Out>
   with: UnaryFunction<In, Out>
   map: <Instance extends M, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IMappedCallMonad<In, Next, Instance>,
   chain: <Instance extends M, Next extends ICallMonad<Out, any>>(this: Instance, next: Next) => IChainedCallMonad<In, Next, Instance>
@@ -17,7 +18,7 @@ export interface IChainedCallMonad<In, Chained extends M, Previous extends M> ex
 }
 
 export interface ILift {
-  <In, Out>(fn: UnaryFunction<In, Out>): ICallMonad<In, Out>
+  <In, Out>(fn: UnaryFunction<In, Out>, thisArg?: any): ICallMonad<In, Out>
 }
 
 export interface IAll {
