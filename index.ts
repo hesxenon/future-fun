@@ -1,3 +1,2 @@
 export * from './src/call'
-export * from './src/test'
-export * from './src/types'
+export { ICallMonad, UnaryFunction, InOf, OutOf } from './src/types'

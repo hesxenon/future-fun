@@ -2,8 +2,7 @@ import { assert } from 'chai'
 import { ident, double, stringify } from './test.util'
 
 interface ICallMonad<In, Out> {
-  value: UnaryFunction<In, Out>
-  flatten: <Instance extends M>(this: Instance) => typeof this['value']
+  fn: UnaryFunction<In, Out>
   map: <Instance extends M, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IHasPrevious<Out, Next, Instance>,
   chain: <Instance extends M, Next extends M>(this: Instance, next: Next) => IHasPrevious<Out, OutOf<Next>, Instance>
   with: (arg: In) => Out
@@ -35,13 +34,12 @@ type OutOf<C> = C extends ICallMonad<infer In, infer Out> ? Out : any
 namespace Call {
   export const of: ILift = function (fn) {
     return {
-      value: fn,
-      flatten: function () { return fn },
+      fn: fn,
       map: function (morphism) {
         return Object.assign(Call.of((arg) => morphism(this.with(arg))), { previous: this })
       },
       chain: function (next) {
-        return Object.assign(Call.of((arg) => next.with(arg)), { previous: this })
+        return Object.assign(Call.of((arg) => next.with(this.with(arg))), { previous: this })
       },
       with: function (arg) {
         return fn(arg)
@@ -57,7 +55,7 @@ namespace Call {
 describe('call', () => {
   it('should work', () => {
     const a = Call.of(ident)
-    assert(a.flatten() === ident)
+    assert(a.fn === ident)
     assert(a.map(double).with(2) === 4)
     assert(a.chain(Call.of(double)).with(2) === 4)
 
@@ -76,5 +74,10 @@ describe('call', () => {
     const e = a.chain(Call.of(double))
     assert(e.previous === a)
     assert(e.with(2) === 4)
+  })
+
+  it('should execute the whole callchain', () => {
+    const f = Call.of(ident).map(double).map(double).chain(Call.of(double))
+    assert(f.with(1) === 8)
   })
 })
