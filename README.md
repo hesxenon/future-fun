@@ -104,6 +104,21 @@ _Unwrap the monads value: M(a) -> a_
 Call.with: (arg: In) => Out
 ```
 ### Input
-the parameter of the FIRST call in the callchain.
+* `arg` - the parameter of the FIRST call in the callchain.
 ### Output
 The final value after running through the entire list of actions as defined
+
+## Call.pipe
+_pass morphisms to an inner mapping_
+```typescript
+Call.pipe: <Instance extends M, Next>(this: Instance, op: IOperator<Out, Next>) => IMappedCallMonad<In, Next, Instance>
+```
+### Input
+* `op` - an `IOperator`. See [operators](##Operators)
+### Output
+A mapped call that will map based on whatever you implement
+
+## Operators
+An operator is meant to map a given call to another output, specifically to an output based on a morphism that's passed beforehand. This is easier explained with a demo, so see [pipe.spec.ts](./test/pipe.spec.ts) and [mapPromise.spec.ts](./src/operators/mapPromise.ts)
+
+The `mapPromise` function takes an arbitrary morphism and applies it to the result of a promise that will be returned by the call on which pipe was called.
