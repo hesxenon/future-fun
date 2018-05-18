@@ -1,4 +1,4 @@
-import { IAll, ILift, M } from './types'
+import { IAll, ILift, M, UnaryFunction, ICallMonad } from './types'
 
 export namespace Call {
   export const of: ILift = function (fn, thisArg?) {
@@ -12,6 +12,9 @@ export namespace Call {
       },
       chain: function (chained) {
         return Object.assign(Call.of((arg) => chained.with(this.with(arg))), { previous: this, chained })
+      },
+      pipe: function (op) {
+        return this.map((arg) => op(this).with(this.with(arg)))
       }
     }
   }
