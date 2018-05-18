@@ -43,7 +43,7 @@ describe('demo', () => {
 
   it('should directly return the result of the chained call', () => {
     const c = Call.of(ident).chain(Call.of(double))
-    assert(testCall(c, 1) === 2)
+    assert(testCall(c, 1).exec() === 2)
   })
 
   it('should directly return the result of the mapped call', () => {
@@ -88,7 +88,7 @@ describe('demo', () => {
     it('should be possible to execute save normally', () => {
       const doubleAndSave = Call.of(double).chain(Call.of(save))
       const expectedId = Object.keys(storage).length
-      doubleAndSave.with(2).then(({ id, num }) => {
+      doubleAndSave.with(2).exec().then(({ id, num }) => {
         assert(num === 4)
         assert(id === expectedId)
       })
