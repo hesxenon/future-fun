@@ -1,7 +1,7 @@
-import { ICallMonad, IChainedCallMonad, IMappedCallMonad, M, OutOf } from './types'
+import { ICallMonad, IChainedCallMonad, IMappedCallMonad, M, OutOf, IExecutable } from './types'
 
-export function testCall<In, Next extends M, Previous extends M> (call: IChainedCallMonad<In, Next, Previous>, arg: OutOf<Previous>): OutOf<Next>
-export function testCall<In, Out, Previous extends M> (call: IMappedCallMonad<In, Out, Previous>, arg: OutOf<Previous>): Out
+export function testCall<In, Next extends M, Instance extends M> (call: IChainedCallMonad<In, Next, Instance>, arg: OutOf<Instance>): IExecutable<Next>
+export function testCall<In, Out, Instance extends M> (call: IMappedCallMonad<In, Out, Instance>, arg: OutOf<Instance>): Out
 export function testCall<In, Out> (call: ICallMonad<In, Out>, arg: In): Out
 export function testCall<In, Out> (call: M, arg: any): any {
   if (isMapped(call)) {

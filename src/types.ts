@@ -1,20 +1,25 @@
 export interface ICallMonad<In, Out> {
   fn: UnaryFunction<In, Out>
-  with: UnaryFunction<In, Out>
-  map: <Instance extends M, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IMappedCallMonad<In, Next, Instance>
-  chain: <Instance extends M, Next extends ICallMonad<Out, any>>(this: Instance, next: Next) => IChainedCallMonad<In, Next, Instance>
-  pipe: <Instance extends M, Next>(this: Instance, op: IOperator<Out, Next>) => IMappedCallMonad<In, Next, Instance>
+  with: <Instance extends this>(this: Instance, arg: In) => IExecutable<Instance>
+  map: <Instance extends this, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IMappedCallMonad<In, Next, Instance>
+  chain: <Instance extends this, Next extends ICallMonad<Out, OutOf<Next>>>(this: Instance, next: Next) => IChainedCallMonad<In, Next, Instance>
+  pipe: <Instance extends this, Next>(this: Instance, op: IBinaryOperator<Out, Next>) => IMappedCallMonad<In, Next, Instance>
+}
+
+export interface IExecutable<Instance extends M> {
+  exec: () => OutOf<Instance>
+  instance: Instance
 }
 
 export interface IHasPrevious<Previous> {
   previous: Previous
 }
 
-export interface IMappedCallMonad<In, Out, Previous extends M> extends ICallMonad<In, Out>, IHasPrevious<Previous> {
-  morphism: UnaryFunction<OutOf<Previous>, Out>
+export interface IMappedCallMonad<In, Out, Instance extends M> extends ICallMonad<In, Out>, IHasPrevious<Instance> {
+  morphism: UnaryFunction<OutOf<Instance>, Out>
 }
 
-export interface IChainedCallMonad<In, Chained extends M, Previous extends M> extends ICallMonad<In, OutOf<Chained>>, IHasPrevious<Previous> {
+export interface IChainedCallMonad<In, Chained extends M, Instance extends M> extends ICallMonad<In, OutOf<Chained>>, IHasPrevious<Instance> {
   chained: Chained
 }
 
@@ -22,8 +27,8 @@ export interface ILift {
   <In, Out>(fn: UnaryFunction<In, Out>, thisArg?: any): ICallMonad<In, Out>
 }
 
-export interface IOperator<From, To> {
-  <Previous extends ICallMonad<any, From>>(previous: Previous): IMappedCallMonad<From, To, Previous>
+export interface IBinaryOperator<Out, Next> {
+  (result: Out): Next
 }
 
 export interface IAll {
@@ -40,5 +45,8 @@ export interface UnaryFunction<In, Out> {
 }
 export type M = ICallMonad<any, any>
 
-export type InOf<C> = C extends ICallMonad<infer In, infer Out> ? In : any
-export type OutOf<C> = C extends ICallMonad<infer In, infer Out> ? Out : any
+export type InOf<C> = C extends ICallMonad<infer In, infer Out> ? In :
+  C extends UnaryFunction<infer In, infer Out> ? In : any
+export type OutOf<C> = C extends ICallMonad<infer In, infer Out> ? Out :
+  C extends UnaryFunction<infer In, infer Out> ? Out : any
+export type PreviousOf<C> = C extends IHasPrevious<infer Previous> ? Previous : any
