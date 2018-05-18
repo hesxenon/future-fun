@@ -1,7 +1,3 @@
-import { UnaryFunction, IOperator } from '../types'
+import { IBinaryOperator, M, UnaryFunction, IMappedCallMonad, ICallMonad } from '../types'
 
-export const mapPromise: <In, Out>(morphism: UnaryFunction<In, Out>) => IOperator<Promise<In>, Promise<Out>> = (morphism) => {
-  return (previous) => {
-    return previous.map(x$ => x$.then(morphism))
-  }
-}
+export const mapPromise: <In, Out>(morphism: UnaryFunction<In, Out>) => IBinaryOperator<Promise<In>, Promise<Out>> = (morphism) => (result) => result.then(morphism)
