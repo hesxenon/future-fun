@@ -1,4 +1,4 @@
-import { flatMap } from './operators/flatMap'
+import { flatMapTo } from './operators/flatMapTo'
 import { map } from './operators/map'
 import { IAll, ILift, M } from './types'
 
@@ -16,7 +16,7 @@ export namespace Call {
         return map(this, morphism)
       },
       chain: function (piped) {
-        return flatMap(this, (_: any) => piped)
+        return flatMapTo(this, piped)
       }
     }
   }
