@@ -5,6 +5,12 @@ import { double, ident, stringify } from './test.util'
 import { testCall } from '../src/test'
 
 describe('demo', () => {
+
+  it('should be possible to test an unpiped call', () => {
+    const a = Call.of(double)
+    assert(testCall(a, 1) === 2)
+  })
+
   it('should fetch list of user and aggregate avatar ', () => {
     const str = 'dan'
     const fetchDb = Call.of((_: undefined) => {
@@ -93,11 +99,6 @@ describe('demo', () => {
         assert(num === 4)
         assert(id === expectedId)
       })
-    })
-
-    it('should be possible to test an unpiped call', () => {
-      const a = Call.of(double)
-      assert(testCall(a, 1) === 2)
     })
   })
 })
