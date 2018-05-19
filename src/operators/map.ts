@@ -1,7 +1,6 @@
-import { IPipedCallMonad, InOf, M, UnaryFunction } from '../types'
-import { createCallFactory } from './util'
+import { InOf, M, OutOf, UnaryFunction } from '../types'
+import { IBindCall, transformCall } from './util'
 
-export const map: <From, To, Instance extends M>(instance: Instance, morphism: UnaryFunction<From, To>) => IPipedCallMonad<InOf<Instance>, To, UnaryFunction<From, To>, Instance> =
-  createCallFactory(({ morphism }) => result => {
-    return morphism(result)
-  })
+export function map<From, To> (morphism: UnaryFunction<From, To>): IBindCall<From, To, From, To> {
+  return (instance) => transformCall({ morphism, on: instance }, morphism)
+}

@@ -31,6 +31,11 @@ export interface IAll {
   (...calls: M[]): ICallMonad<any[], any[]>
 }
 
+export interface IPipe {
+  <Instance extends M, M1 extends M>(instance: Instance, m1: M1): IPipedCallMonad<InOf<Instance>, OutOf<M1>, UnaryFunction<OutOf<Instance>, InOf<M1>>, Instance>
+  <Instance extends M>(instance: Instance, ...ms: M[]): IPipedCallMonad<InOf<Instance>, any, UnaryFunction<OutOf<Instance>, any>, Instance>
+}
+
 export interface NullaryFunction<Out> {
   (): Out
 }

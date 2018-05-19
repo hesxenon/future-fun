@@ -13,7 +13,7 @@ export namespace Call {
         }
       },
       map: function (morphism) {
-        return map(this, morphism)
+        return map(morphism)(this)
       },
       chain: function (piped) {
         return flatMapTo(this, piped)

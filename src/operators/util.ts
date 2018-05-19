@@ -1,15 +1,15 @@
 import { Call } from '../..'
-import { IPipedCallMonad, InOf, M, OutOf, UnaryFunction } from '../types'
+import { IPipedCallMonad, InOf, M, OutOf, UnaryFunction, ICallMonad } from '../types'
 
-export function createCallFactory<In, Out, From, To, Instance extends M> (fn: (arg: { instance: Instance, morphism: UnaryFunction<From, To> }) => (result: OutOf<Instance>) => Out) {
-  return (instance: Instance, morphism: InOf<typeof fn>['morphism']) => Object.assign(
+export function transformCall<In, Out, From, To, Instance extends M> ({ morphism, on }: { morphism: UnaryFunction<From, To>, on: Instance }, fn: (result: OutOf<Instance>) => Out) {
+  return Object.assign(
     Call.of((result: OutOf<Instance>) => {
-      return fn({ instance, morphism })(instance.with(result).exec())
+      return fn(on.with(result).exec())
     }),
-    { previous: instance, morphism }
+    { previous: on, morphism }
   ) as IPipedCallMonad<In, Out, UnaryFunction<From, To>, Instance>
 }
 
-export function pipe<Instance extends M> (start: Instance, ...calls: M[]) {
-  return start.map(x => calls.reduce((y, call) => call.with(y).exec(), x))
+export interface IBindCall<In, Out, From, To> {
+  <Instance extends ICallMonad<InOf<Instance>, In>>(instance: Instance): IPipedCallMonad<InOf<Instance>, Out, UnaryFunction<From, To>, Instance>
 }
