@@ -2,7 +2,7 @@ export interface ICallMonad<In, Out> {
   fn: UnaryFunction<In, Out>
   with: <Instance extends this>(this: Instance, arg: In) => IExecutable<Instance>
   map: <Instance extends this, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IPipedCallMonad<In, Next, IOperator<Out, Next, typeof morphism>, Instance>
-  chain: <Instance extends this, Next extends ICallMonad<Out, OutOf<Next>>>(this: Instance, next: Next) => IChainedCallMonad<In, Next, Instance>
+  chain: <Instance extends this, Next extends ICallMonad<Out, OutOf<Next>>>(this: Instance, next: Next) => IPipedCallMonad<In, OutOf<Next>, IOperator<Out, Next, UnaryFunction<undefined, Next>>, Instance>
   pipe: <Instance extends this, Next, Morphism extends UnaryFunction<any, any>>(this: Instance, op: IOperator<Out, Next, Morphism>) => IPipedCallMonad<In, Next, typeof op, Instance>
 }
 

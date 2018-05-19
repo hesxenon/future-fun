@@ -43,7 +43,7 @@ describe('demo', () => {
 
   it('should directly return the result of the chained call', () => {
     const c = Call.of(ident).chain(Call.of(double))
-    assert(testCall(c, 1).exec() === 2)
+    assert(testCall(c, 1) === 2)
   })
 
   it('should directly return the result of the mapped call', () => {
@@ -54,9 +54,10 @@ describe('demo', () => {
   it('should be possible to test the callchain of a nested call', () => {
     const doubleString = Call.of(double).map(stringify)
     const c = Call.of(ident).chain(doubleString)
-    assert(c.chained === doubleString)
-    assert(c.chained.operator.morphism === stringify)
-    assert(c.chained.previous.fn === double)
+    const chainedCall = c.operator.morphism(undefined)
+    assert(chainedCall === doubleString)
+    assert(chainedCall.operator.morphism === stringify)
+    assert(chainedCall.previous.fn === double)
   })
 
   describe('test save', () => {
