@@ -1,4 +1,4 @@
-import { ICallMonad, IExecutable, IPipedCallMonad, M, OutOf, UnaryFunction } from './types'
+import { ICallMonad, IPipedCallMonad, M, OutOf, UnaryFunction } from './types'
 
 export function testCall<In, Next, Instance extends M, Morphism extends UnaryFunction<any, any>> (call: IPipedCallMonad<In, Next, Morphism, Instance>, arg: OutOf<Instance>): OutOf<Morphism>
 export function testCall<In, Out> (call: ICallMonad<In, Out>, arg: In): Out

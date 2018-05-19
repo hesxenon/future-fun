@@ -1,5 +1,5 @@
-import { M, UnaryFunction, InOf, IPipedCallMonad, ICallMonad, OutOf } from '../types'
 import { Call } from '../..'
+import { IPipedCallMonad, InOf, M, OutOf, UnaryFunction } from '../types'
 
 export function createCallFactory<In, Out, From, To, Instance extends M> (fn: (arg: { instance: Instance, morphism: UnaryFunction<From, To> }) => (result: OutOf<Instance>) => Out) {
   return (instance: Instance, morphism: InOf<typeof fn>['morphism']) => Object.assign(
