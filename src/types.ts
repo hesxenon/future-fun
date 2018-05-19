@@ -15,10 +15,6 @@ export interface IHasPrevious<Previous> {
   previous: Previous
 }
 
-export interface IChainedCallMonad<In, Chained extends M, Instance extends M> extends ICallMonad<In, OutOf<Chained>>, IHasPrevious<Instance> {
-  chained: Chained
-}
-
 export interface IPipedCallMonad<In, Out, Operator extends IOperator<any, any, any>, Instance extends M> extends ICallMonad<In, Out>, IHasPrevious<Instance> {
   operator: Operator
 }
