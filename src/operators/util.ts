@@ -1,12 +1,12 @@
 import { Call } from '../..'
 import { IPipedCallMonad, InOf, M, OutOf, UnaryFunction, ICallMonad } from '../types'
 
-export function transformCall<In, Out, From, To, Instance extends M> ({ morphism, on }: { morphism: UnaryFunction<From, To>, on: Instance }, fn: (result: OutOf<Instance>) => Out) {
-  return Object.assign(
+export function transformCall<In, Out, From, To, Instance extends M> (morphism: UnaryFunction<From, To>, fn: (result: OutOf<Instance>) => Out) {
+  return (instance: Instance) => Object.assign(
     Call.of((result: OutOf<Instance>) => {
-      return fn(on.with(result).exec())
+      return fn(instance.with(result).exec())
     }),
-    { previous: on, morphism }
+    { previous: instance, morphism }
   ) as IPipedCallMonad<In, Out, UnaryFunction<From, To>, Instance>
 }
 
