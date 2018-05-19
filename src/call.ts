@@ -16,8 +16,8 @@ export namespace Call {
       chain: function (chained) {
         return Object.assign(Call.of((arg) => chained.with(this.with(arg as InOf<typeof fn>).exec()).exec()), { previous: this, chained })
       },
-      pipe: function (transform) {
-        return this.map(transform)
+      pipe: function (operator) {
+        return Object.assign(Call.of((arg) => operator(this.with(arg as InOf<typeof fn>).exec())), { previous: this, operator })
       }
     }
   }

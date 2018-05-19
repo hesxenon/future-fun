@@ -1,5 +1,5 @@
-import { Call } from '../..'
-import { ICallMonad, IBinaryOperator, M, UnaryFunction, OutOf, IExecutable } from '../types'
-import { ident } from '../../test/test.util'
+import { IOperator, M, OutOf, UnaryFunction } from '../types'
+import { createOperator } from './util'
 
-export const flatMap: <From, To extends M>(morphism: UnaryFunction<From, To>) => IBinaryOperator<From, IExecutable<To>> = (morphism) => (previous) => morphism(previous).with(previous)
+export const flatMap: <From, To extends M>(morphism: UnaryFunction<From, To>) => IOperator<From, OutOf<To>, typeof morphism> =
+  createOperator(morphism => previous => morphism(previous).with(previous).exec())
