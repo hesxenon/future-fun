@@ -55,7 +55,7 @@ describe('demo', () => {
     const doubleString = Call.of(double).map(stringify)
     const c = Call.of(ident).chain(doubleString)
     assert(c.chained === doubleString)
-    assert(c.chained.morphism === stringify)
+    assert(c.chained.operator.morphism === stringify)
     assert(c.chained.previous.fn === double)
   })
 

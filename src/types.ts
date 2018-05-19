@@ -1,7 +1,7 @@
 export interface ICallMonad<In, Out> {
   fn: UnaryFunction<In, Out>
   with: <Instance extends this>(this: Instance, arg: In) => IExecutable<Instance>
-  map: <Instance extends this, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IMappedCallMonad<In, Next, Instance>
+  map: <Instance extends this, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IPipedCallMonad<In, Next, IOperator<Out, Next, typeof morphism>, Instance>
   chain: <Instance extends this, Next extends ICallMonad<Out, OutOf<Next>>>(this: Instance, next: Next) => IChainedCallMonad<In, Next, Instance>
   pipe: <Instance extends this, Next, Morphism extends UnaryFunction<any, any>>(this: Instance, op: IOperator<Out, Next, Morphism>) => IPipedCallMonad<In, Next, typeof op, Instance>
 }
@@ -13,10 +13,6 @@ export interface IExecutable<Instance extends M> {
 
 export interface IHasPrevious<Previous> {
   previous: Previous
-}
-
-export interface IMappedCallMonad<In, Out, Instance extends M> extends ICallMonad<In, Out>, IHasPrevious<Instance> {
-  morphism: UnaryFunction<OutOf<Instance>, Out>
 }
 
 export interface IChainedCallMonad<In, Chained extends M, Instance extends M> extends ICallMonad<In, OutOf<Chained>>, IHasPrevious<Instance> {

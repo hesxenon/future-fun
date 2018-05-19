@@ -1,4 +1,5 @@
 import { IAll, ILift, M, UnaryFunction, ICallMonad, InOf } from './types'
+import { map } from './operators/map'
 
 export namespace Call {
   export const of: ILift = function (fn, thisArg?) {
@@ -11,7 +12,7 @@ export namespace Call {
         }
       },
       map: function (morphism) {
-        return Object.assign(Call.of((arg) => morphism(this.with(arg as InOf<typeof fn>).exec())), { previous: this, morphism })
+        return this.pipe(map(morphism))
       },
       chain: function (chained) {
         return Object.assign(Call.of((arg) => chained.with(this.with(arg as InOf<typeof fn>).exec()).exec()), { previous: this, chained })
