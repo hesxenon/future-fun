@@ -61,7 +61,7 @@ describe('demo', () => {
   it('should be possible to test the callchain of a nested call', () => {
     const doubleString = Call.of(double).map(stringify)
     const c = Call.of(ident).chain(doubleString)
-    const chainedCall = c.morphism(1)
+    const chainedCall = c.morphism()
     assert(chainedCall === doubleString)
     assert(chainedCall.morphism === stringify)
     assert(chainedCall.previous.fn === double)
