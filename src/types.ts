@@ -43,6 +43,15 @@ export interface NullaryFunction<Out> {
 export interface UnaryFunction<In, Out> {
   (arg: In): Out
 }
+
+export interface INullaryOperator<In, Out, To> {
+  <Instance extends ICallMonad<InOf<Instance>, In>>(instance: Instance): IPipedCallMonad<InOf<Instance>, Out, NullaryFunction<To>, Instance>
+}
+
+export interface IUnaryOperator<In, Out, From, To> {
+  <Instance extends ICallMonad<InOf<Instance>, In>>(instance: Instance): IPipedCallMonad<InOf<Instance>, Out, UnaryFunction<From, To>, Instance>
+}
+
 export type M = ICallMonad<any, any>
 
 export type InOf<C> = C extends ICallMonad<infer In, infer Out> ? In :
