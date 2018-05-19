@@ -1,12 +1,15 @@
-import { M, UnaryFunction, InOf, IOperator, IPipedCallMonad } from '../types'
+import { M, UnaryFunction, InOf, IPipedCallMonad, ICallMonad, OutOf } from '../types'
+import { Call } from '../..'
 
-export function createOperator<In, Out, From, To> (fn: (morphism: UnaryFunction<From, To>) => UnaryFunction<In, Out>) {
-  return (morphism: InOf<typeof fn>) => Object.assign(
-    fn(morphism),
-    { morphism }
-  ) as IOperator<In, Out, typeof morphism>
+export function createCallFactory<In, Out, From, To, Instance extends M> (fn: (arg: { instance: Instance, morphism: UnaryFunction<From, To> }) => (result: OutOf<Instance>) => Out) {
+  return (instance: Instance, morphism: InOf<typeof fn>['morphism']) => Object.assign(
+    Call.of((result: OutOf<Instance>) => {
+      return fn({ instance, morphism })(instance.with(result).exec())
+    }),
+    { previous: instance, morphism }
+  ) as IPipedCallMonad<In, Out, UnaryFunction<From, To>, Instance>
 }
 
-export function pipe<Instance extends M> (start: Instance, ...ops: IOperator<any, any, any>[]) {
-  return start.map(x => ops.reduce((y, val) => val(y), x))
+export function pipe<Instance extends M> (start: Instance, ...calls: M[]) {
+  return start.map(x => calls.reduce((y, call) => call.with(y).exec(), x))
 }
