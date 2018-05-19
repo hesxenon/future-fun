@@ -1,5 +1,7 @@
-import { IOperator, UnaryFunction } from '../types'
-import { createOperator } from './util'
+import { UnaryFunction, M, IPipedCallMonad, ICallMonad, InOf } from '../types'
+import { createCallFactory } from './util'
 
-export const map: <From, To>(morphism: UnaryFunction<From, To>) => IOperator<From, To, typeof morphism> =
-  createOperator((morphism) => (previous) => morphism(previous))
+export const map: <From, To, Instance extends M>(instance: Instance, morphism: UnaryFunction<From, To>) => IPipedCallMonad<InOf<Instance>, To, UnaryFunction<From, To>, Instance> =
+  createCallFactory(({ morphism }) => result => {
+    return morphism(result)
+  })

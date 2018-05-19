@@ -1,9 +1,8 @@
 export interface ICallMonad<In, Out> {
   fn: UnaryFunction<In, Out>
   with: <Instance extends this>(this: Instance, arg: In) => IExecutable<Instance>
-  map: <Instance extends this, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IPipedCallMonad<In, Next, IOperator<Out, Next, typeof morphism>, Instance>
-  chain: <Instance extends this, Next extends ICallMonad<Out, OutOf<Next>>>(this: Instance, next: Next) => IPipedCallMonad<In, OutOf<Next>, IOperator<Out, Next, () => Next>, Instance>
-  pipe: <Instance extends this, Next, Morphism extends UnaryFunction<any, any>>(this: Instance, op: IOperator<Out, Next, Morphism>) => IPipedCallMonad<In, Next, typeof op, Instance>
+  map: <Instance extends this, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IPipedCallMonad<InOf<Instance>, Next, UnaryFunction<OutOf<Instance>, Next>, Instance>
+  chain: <Instance extends this, Next extends M>(this: Instance, next: Next) => IPipedCallMonad<InOf<Instance>, OutOf<Next>, UnaryFunction<OutOf<Instance>, Next>, Instance>
 }
 
 export interface IExecutable<Instance extends M> {
@@ -15,17 +14,13 @@ export interface IHasPrevious<Previous> {
   previous: Previous
 }
 
-export interface IPipedCallMonad<In, Out, Operator extends IOperator<any, any, any>, Instance extends M> extends ICallMonad<In, Out>, IHasPrevious<Instance> {
-  operator: Operator
+export interface IPipedCallMonad<In, Out, Morphism extends UnaryFunction<any, any>, Instance extends M> extends ICallMonad<In, Out>, IHasPrevious<Instance> {
+  // TODO: piped should be replaced with the morphism that will be applied
+  morphism: Morphism
 }
 
 export interface ILift {
   <In, Out>(fn: UnaryFunction<In, Out>, thisArg?: any): ICallMonad<In, Out>
-}
-
-export interface IOperator<In, Out, Morphism extends UnaryFunction<any, any>> {
-  (arg: In): Out
-  morphism: Morphism
 }
 
 export interface IAll {
