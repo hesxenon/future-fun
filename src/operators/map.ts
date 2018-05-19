@@ -1,6 +1,6 @@
 import { InOf, M, OutOf, UnaryFunction } from '../types'
-import { IBindCall, transformCall } from './util'
+import { IOperator, createOperator } from './util'
 
-export function map<From, To> (morphism: UnaryFunction<From, To>): IBindCall<From, To, From, To> {
-  return transformCall(morphism, morphism)
+export function map<From, To> (morphism: UnaryFunction<From, To>): IOperator<From, To, From, To> {
+  return createOperator(morphism, morphism)
 }
