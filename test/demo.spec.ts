@@ -54,7 +54,7 @@ describe('demo', () => {
   it('should be possible to test the callchain of a nested call', () => {
     const doubleString = Call.of(double).map(stringify)
     const c = Call.of(ident).chain(doubleString)
-    const chainedCall = c.operator.morphism(undefined)
+    const chainedCall = c.operator.morphism()
     assert(chainedCall === doubleString)
     assert(chainedCall.operator.morphism === stringify)
     assert(chainedCall.previous.fn === double)
@@ -89,6 +89,7 @@ describe('demo', () => {
     it('should be possible to execute save normally', () => {
       const doubleAndSave = Call.of(double).chain(Call.of(save))
       const expectedId = Object.keys(storage).length
+      const x = doubleAndSave.with(2).exec()
       doubleAndSave.with(2).exec().then(({ id, num }) => {
         assert(num === 4)
         assert(id === expectedId)
