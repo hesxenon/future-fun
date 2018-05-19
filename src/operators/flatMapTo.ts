@@ -1,6 +1,6 @@
-import { Call } from '../call'
-import { IPipedCallMonad, InOf, M, NullaryFunction, OutOf } from '../types'
+import { InOf, M, OutOf } from '../types'
+import { INullaryOperator, createOperator } from './util'
 
-export const flatMapTo: <To extends M, Instance extends M>(instance: Instance, call: To) => IPipedCallMonad<InOf<Instance>, OutOf<To>, NullaryFunction<To>, Instance> = (instance, call) => {
-  return Object.assign(Call.of((result) => call.with(instance.with(result).exec()).exec()), { morphism: () => call, previous: instance })
+export function flatMapTo<To extends M> (call: To): INullaryOperator<InOf<To>, OutOf<To>, To> {
+  return createOperator(() => call, result => call.with(result).exec())
 }
