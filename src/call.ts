@@ -1,6 +1,6 @@
-import { IAll, ILift, M, UnaryFunction, ICallMonad, InOf } from './types'
+import { flatMap } from './operators/flatMap'
 import { map } from './operators/map'
-import { flatMapTo } from './operators/flatMapTo'
+import { IAll, ILift, M } from './types'
 
 export namespace Call {
   export const of: ILift = function (fn, thisArg?) {
@@ -13,14 +13,10 @@ export namespace Call {
         }
       },
       map: function (morphism) {
-        return this.pipe(map(morphism))
+        return map(this, morphism)
       },
-      chain: function (chained) {
-        return this.pipe(flatMapTo(chained))
-        // return Object.assign(Call.of((arg) => chained.with(this.with(arg as InOf<typeof fn>).exec()).exec()), { previous: this, chained })
-      },
-      pipe: function (operator) {
-        return Object.assign(Call.of((arg) => operator(this.with(arg as InOf<typeof fn>).exec())), { previous: this, operator })
+      chain: function (piped) {
+        return flatMap(this, (_: any) => piped)
       }
     }
   }
