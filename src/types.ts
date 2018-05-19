@@ -15,7 +15,6 @@ export interface IHasPrevious<Previous> {
 }
 
 export interface IPipedCallMonad<In, Out, Morphism extends UnaryFunction<any, any>, Instance extends M> extends ICallMonad<In, Out>, IHasPrevious<Instance> {
-  // TODO: piped should be replaced with the morphism that will be applied
   morphism: Morphism
 }
 
