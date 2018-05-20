@@ -7,7 +7,7 @@ export function testCall<In, Out> (call: M, arg?: any): any {
   if (isPiped(call)) {
     return call.operator.morphism(arg)
   }
-  return call.with(arg).exec()
+  return call.with(arg)
 }
 
 function isPiped (c: All): c is IPipedCallMonad<any, any, any, any> {

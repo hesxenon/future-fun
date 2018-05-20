@@ -1,13 +1,8 @@
 export interface ICallMonad<In, Out> {
-  with: <Instance extends this>(this: Instance, arg: In) => IExecutable<Instance>
+  with: <Instance extends this>(this: Instance, arg: In) => Out
   pipe: IBoundPipe
   map: <Instance extends this, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IPipedCallMonad<In, Next, IOperator<Out, Next, UnaryFunction<Out, Next>>, Instance>
   chain: <Instance extends this, Next extends ICallMonad<Out, any>>(this: Instance, next: Next) => IPipedCallMonad<In, OutOf<Next>, IOperator<InOf<Next>, OutOf<Next>, NullaryFunction<Next>>, Instance>
-}
-
-export interface IExecutable<Instance extends M> {
-  exec: () => OutOf<Instance>
-  instance: Instance
 }
 
 export interface IHasPrevious<Previous> {
@@ -89,7 +84,6 @@ export type InOf<C> = C extends ICallMonad<infer In, infer Out> ? In :
 export type OutOf<C> = C extends ICallMonad<infer In, infer Out> ? Out :
   C extends NullaryFunction<infer Out> ? Out :
   C extends UnaryFunction<infer In, infer Out> ? Out :
-  C extends IExecutable<infer M> ? M extends ICallMonad<any, infer Out> ? Out : any :
   any
 export type PreviousOf<C> =
   C extends IHasPrevious<infer Previous> ? Previous :

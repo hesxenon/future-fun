@@ -15,7 +15,7 @@ describe('piping', () => {
     /**
      * a,c and d are equal, but once mapPromise is set-up it can be reused
      */
-    Call.all(a, c, d).map(x$ => Promise.all(x$)).with([2, 1, 1]).exec().then((numbers) => {
+    Call.all(a, c, d).map(x$ => Promise.all(x$)).with([2, 1, 1]).then((numbers) => {
       assert(numbers.every(num => num === 2))
       done()
     })
@@ -28,7 +28,7 @@ describe('piping', () => {
     }), map((x: number) => {
       return x * 2
     }))
-    assert(a.pipe(quadruple).with(1).exec() === 4)
+    assert(a.pipe(quadruple).with(1) === 4)
   })
 
   it('should be possible to access each operator of a piped chain', () => {

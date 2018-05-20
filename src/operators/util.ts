@@ -6,7 +6,7 @@ export function createOperator<In, Out, From, To> (morphism: UnaryFunction<From,
 export function createOperator<In, Out, From, To> (morphism: Morphism, fn: (result: In) => Out): IOperator<In, Out, typeof morphism> {
   const op: IOperator<In, Out, typeof morphism> = Object.assign(<Instance extends ICallMonad<any, In>>(instance: Instance) => Object.assign(
     Call.of((result) => {
-      return fn(instance.with(result).exec())
+      return fn(instance.with(result))
     }),
     { previous: instance, operator: op }
   ), { morphism })

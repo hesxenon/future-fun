@@ -98,7 +98,7 @@ describe('demo', () => {
     it('should be possible to execute save normally', () => {
       const doubleAndSave = Call.of(double).chain(Call.of(save))
       const expectedId = Object.keys(storage).length
-      doubleAndSave.with(2).exec().then(({ id, num }) => {
+      doubleAndSave.with(2).then(({ id, num }) => {
         assert(num === 4)
         assert(id === expectedId)
       })
