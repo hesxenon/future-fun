@@ -1,8 +1,8 @@
 export interface ICallMonad<In, Out> {
   fn: UnaryFunction<In, Out>
   with: <Instance extends this>(this: Instance, arg: In) => IExecutable<Instance>
-  map: <Instance extends this, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IPipedCallMonad<InOf<Instance>, Next, UnaryFunction<OutOf<Instance>, Next>, Instance>
-  chain: <Instance extends this, Next extends M>(this: Instance, next: Next) => IPipedCallMonad<InOf<Instance>, OutOf<Next>, NullaryFunction<Next>, Instance>
+  map: <Instance extends this, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IPipedCallMonad<In, Next, IOperator<Out, Next, UnaryFunction<Out, Next>>, Instance>
+  chain: <Instance extends this, Next extends ICallMonad<Out, any>>(this: Instance, next: Next) => IPipedCallMonad<In, OutOf<Next>, IOperator<InOf<Next>, OutOf<Next>, NullaryFunction<Next>>, Instance>
 }
 
 export interface IExecutable<Instance extends M> {
@@ -14,8 +14,8 @@ export interface IHasPrevious<Previous> {
   previous: Previous
 }
 
-export interface IPipedCallMonad<In, Out, Morphism extends UnaryFunction<any, any>, Instance extends M> extends ICallMonad<In, Out>, IHasPrevious<Instance> {
-  morphism: Morphism
+export interface IPipedCallMonad<In, Out, Op extends Operator, Instance extends M> extends ICallMonad<In, Out>, IHasPrevious<Instance> {
+  operator: Op
 }
 
 export interface ILift {
@@ -32,9 +32,28 @@ export interface IAll {
 }
 
 export interface IPipe {
-  <Instance extends M, M1 extends M>(instance: Instance, m1: M1): IPipedCallMonad<InOf<Instance>, OutOf<M1>, UnaryFunction<OutOf<Instance>, InOf<M1>>, Instance>
-  <Instance extends M>(instance: Instance, ...ms: M[]): IPipedCallMonad<InOf<Instance>, any, UnaryFunction<OutOf<Instance>, any>, Instance>
+  <O1 extends Operator>(op1: O1): O1
+  <O1 extends Operator, O2 extends ChainedOperator<O1>>(op1: O1, op2: O2): IPipedOperator<O1, O2>
+  <O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>>(op1: O1, op2: O2, op3: O3): IPipedOperator<IPipedOperator<O1, O2>, O3>
+  <O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>, O4 extends ChainedOperator<O3>>(op1: O1, op2: O2, op3: O3, op4: O4): IPipedOperator<IPipedOperator<IPipedOperator<O1, O2>, O3>, O4>
+  <O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>, O4 extends ChainedOperator<O3>, O5 extends ChainedOperator<O4>>(op1: O1, op2: O2, op3: O3, op4: O4, op5: O5): IPipedOperator<IPipedOperator<IPipedOperator<IPipedOperator<O1, O2>, O3>, O4>, O5>
+  (first: Operator, ...chained: Operator[]): Operator
 }
+
+export interface IOperator<In, Out, Mo extends Morphism> {
+  <Instance extends ICallMonad<any, In>>(instance: Instance): IPipedCallMonad<any, Out, IOperator<In, Out, Mo>, Instance>
+  morphism: Mo
+}
+
+export interface IPipedOperator<Previous extends Operator, Instance extends Operator> extends IOperator<OutOfOperator<Previous>, OutOfOperator<Instance>, MorphismOf<Instance>> {
+  previous: Previous
+}
+
+export type InOfOperator<Op> = InOf<MorphismOf<Op>>
+export type OutOfOperator<Op> = OutOf<MorphismOf<Op>>
+export type MorphismOf<Op> =
+  Op extends IOperator<any, any, infer Morphism> ? Morphism :
+  any
 
 export interface NullaryFunction<Out> {
   (): Out
@@ -44,19 +63,18 @@ export interface UnaryFunction<In, Out> {
   (arg: In): Out
 }
 
-export interface INullaryOperator<In, Out, To> {
-  <Instance extends ICallMonad<InOf<Instance>, In>>(instance: Instance): IPipedCallMonad<InOf<Instance>, Out, NullaryFunction<To>, Instance>
-}
-
-export interface IUnaryOperator<In, Out, From, To> {
-  <Instance extends ICallMonad<InOf<Instance>, In>>(instance: Instance): IPipedCallMonad<InOf<Instance>, Out, UnaryFunction<From, To>, Instance>
-}
+export type Morphism = UnaryFunction<any, any> | NullaryFunction<any>
 
 export type M = ICallMonad<any, any>
+export type Operator<In = any, Out = any, Mo extends Morphism = any> = IOperator<In, Out, Mo>
+export type ChainedOperator<Previous extends Operator, Out = any, Mo extends Morphism = any> = Operator<OutOfOperator<Previous>, Out, Mo>
 
 export type InOf<C> = C extends ICallMonad<infer In, infer Out> ? In :
-  C extends UnaryFunction<infer In, infer Out> ? In : any
+  C extends UnaryFunction<infer In, infer Out> ? In :
+  any
 export type OutOf<C> = C extends ICallMonad<infer In, infer Out> ? Out :
+  C extends NullaryFunction<infer Out> ? Out :
   C extends UnaryFunction<infer In, infer Out> ? Out :
-  C extends IExecutable<infer M> ? M extends ICallMonad<any, infer Out> ? Out : any : any
+  C extends IExecutable<infer M> ? M extends ICallMonad<any, infer Out> ? Out : any :
+  any
 export type PreviousOf<C> = C extends IHasPrevious<infer Previous> ? Previous : any

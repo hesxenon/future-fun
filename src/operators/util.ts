@@ -1,13 +1,14 @@
 import { Call } from '../..'
-import { INullaryOperator, IPipedCallMonad, IUnaryOperator, M, NullaryFunction, OutOf, UnaryFunction } from '../types'
+import { IOperator, IPipedCallMonad, M, NullaryFunction, OutOf, UnaryFunction, InOf, ICallMonad, Morphism } from '../types'
 
-export function createOperator<In, Out, To, Instance extends M> (morphism: NullaryFunction<To>, fn: (result: OutOf<Instance>) => Out): INullaryOperator<In, Out, To>
-export function createOperator<In, Out, From, To, Instance extends M> (morphism: UnaryFunction<From, To>, fn: (result: OutOf<Instance>) => Out): IUnaryOperator<In, Out, From, To>
-export function createOperator<In, Out, From, To, Instance extends M> (morphism: UnaryFunction<From, To>, fn: (result: OutOf<Instance>) => Out) {
-  return (instance: Instance) => Object.assign(
-    Call.of((result: OutOf<Instance>) => {
+export function createOperator<In, Out, To> (morphism: NullaryFunction<To>, fn: (result: In) => Out): IOperator<In, Out, typeof morphism>
+export function createOperator<In, Out, From, To> (morphism: UnaryFunction<From, To>, fn: (result: In) => Out): IOperator<In, Out, typeof morphism>
+export function createOperator<In, Out, From, To> (morphism: Morphism, fn: (result: In) => Out) {
+  const op: IOperator<In, Out, typeof morphism> = Object.assign(<Instance extends ICallMonad<any, In>>(instance: Instance) => Object.assign(
+    Call.of((result) => {
       return fn(instance.with(result).exec())
     }),
-    { previous: instance, morphism }
-  ) as IPipedCallMonad<In, Out, UnaryFunction<From, To>, Instance>
+    { previous: instance, operator: op }
+  ), { morphism })
+  return op
 }

@@ -1,8 +1,9 @@
 import { fail } from 'assert'
 import { assert } from 'chai'
 import { Call } from '..'
-import { double, ident, stringify } from './test.util'
 import { testCall } from '../src/test'
+import { double, ident, stringify } from './test.util'
+import { InOfOperator } from '../src/types'
 
 describe('demo', () => {
 
@@ -49,8 +50,8 @@ describe('demo', () => {
 
   it('should return the chained call', () => {
     const c = Call.of(ident).chain(Call.of(double))
-    assert(testCall(c, 1).with(1).exec() === 2)
-    assert(testCall(c, 1).fn === double)
+    assert(testCall(c.operator.morphism(), 1) === 2)
+    assert(c.operator.morphism().fn === double)
   })
 
   it('should directly return the result of the mapped call', () => {
@@ -61,9 +62,9 @@ describe('demo', () => {
   it('should be possible to test the callchain of a nested call', () => {
     const doubleString = Call.of(double).map(stringify)
     const c = Call.of(ident).chain(doubleString)
-    const chainedCall = c.morphism()
+    const chainedCall = c.operator.morphism()
     assert(chainedCall === doubleString)
-    assert(chainedCall.morphism === stringify)
+    assert(chainedCall.operator.morphism === stringify)
     assert(chainedCall.previous.fn === double)
   })
 

@@ -16,7 +16,7 @@ export namespace Call {
         return map(morphism)(this)
       },
       chain: function (chained) {
-        return flatMapTo(chained)(this as any) // TODO check why Out cannot be assigned to InOf<typeof piped>
+        return flatMapTo(chained)(this) // TODO check why Out cannot be assigned to InOf<typeof piped>
       }
     }
   }
