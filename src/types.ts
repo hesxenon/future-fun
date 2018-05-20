@@ -35,18 +35,18 @@ export interface IAll {
 export interface IPipe {
   <O1 extends Operator>(op1: O1): O1
   <O1 extends Operator, O2 extends ChainedOperator<O1>>(op1: O1, op2: O2): IPipedOperator<O1, O2>
-  <O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>>(op1: O1, op2: O2, op3: O3): IPipedOperator<IPipedOperator<O1, O2>, O3>
-  <O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>, O4 extends ChainedOperator<O3>>(op1: O1, op2: O2, op3: O3, op4: O4): IPipedOperator<IPipedOperator<IPipedOperator<O1, O2>, O3>, O4>
-  <O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>, O4 extends ChainedOperator<O3>, O5 extends ChainedOperator<O4>>(op1: O1, op2: O2, op3: O3, op4: O4, op5: O5): IPipedOperator<IPipedOperator<IPipedOperator<IPipedOperator<O1, O2>, O3>, O4>, O5>
+  <O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>>(op1: O1, op2: O2, op3: O3): IPipedOperator<IChainedOperator<O1, O2>, O3>
+  <O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>, O4 extends ChainedOperator<O3>>(op1: O1, op2: O2, op3: O3, op4: O4): IPipedOperator<IChainedOperator<IChainedOperator<O1, O2>, O3>, O4>
+  <O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>, O4 extends ChainedOperator<O3>, O5 extends ChainedOperator<O4>>(op1: O1, op2: O2, op3: O3, op4: O4, op5: O5): IPipedOperator<IChainedOperator<IChainedOperator<IChainedOperator<O1, O2>, O3>, O4>, O5>
   (...chained: Operator[]): Operator
 }
 
 export interface IBoundPipe {
   <I extends M, O1 extends Operator>(this: I, op1: O1): IPipedCallMonad<InOf<I>, OutOfOperator<O1>, O1, I>
   <I extends M, O1 extends Operator, O2 extends ChainedOperator<O1>>(this: I, op1: O1, op2: O2): IPipedCallMonad<InOf<I>, OutOfOperator<O2>, IPipedOperator<O1, O2>, I>
-  <I extends M, O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>>(this: I, op1: O1, op2: O2, op3: O3): IPipedCallMonad<InOf<I>, OutOfOperator<O2>, IPipedOperator<IPipedOperator<O1, O2>, O3>, I>
-  <I extends M, O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>, O4 extends ChainedOperator<O3>>(this: I, op1: O1, op2: O2, op3: O3, op4: O4): IPipedCallMonad<InOf<I>, OutOfOperator<O2>, IPipedOperator<IPipedOperator<IPipedOperator<O1, O2>, O3>, O4>, I>
-  <I extends M, O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>, O4 extends ChainedOperator<O3>, O5 extends ChainedOperator<O4>>(this: I, op1: O1, op2: O2, op3: O3, op4: O4, op5: O5): IPipedCallMonad<InOf<I>, OutOfOperator<O2>, IPipedOperator<IPipedOperator<IPipedOperator<IPipedOperator<O1, O2>, O3>, O4>, O5>, I>
+  <I extends M, O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>>(this: I, op1: O1, op2: O2, op3: O3): IPipedCallMonad<InOf<I>, OutOfOperator<O2>, IPipedOperator<O1, O3>, I>
+  <I extends M, O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>, O4 extends ChainedOperator<O3>>(this: I, op1: O1, op2: O2, op3: O3, op4: O4): IPipedCallMonad<InOf<I>, OutOfOperator<O2>, IPipedOperator<O1, O4>, I>
+  <I extends M, O1 extends Operator, O2 extends ChainedOperator<O1>, O3 extends ChainedOperator<O2>, O4 extends ChainedOperator<O3>, O5 extends ChainedOperator<O4>>(this: I, op1: O1, op2: O2, op3: O3, op4: O4, op5: O5): IPipedCallMonad<InOf<I>, OutOfOperator<O2>, IPipedOperator<O1, O5>, I>
   <I extends M>(...chained: Operator[]): IPipedCallMonad<InOf<I>, any, any, I>
 }
 
@@ -58,8 +58,12 @@ export interface IOperator<In, Out, Mo extends Morphism> {
   morphism: Mo
 }
 
-export interface IPipedOperator<Previous extends Operator, Instance extends Operator> extends IOperator<OutOfOperator<Previous>, OutOfOperator<Instance>, MorphismOf<Instance>> {
+export interface IChainedOperator<Previous extends Operator, Instance extends Operator> extends IOperator<OutOfOperator<Previous>, OutOfOperator<Instance>, UnaryFunction<InOfOperator<Previous>, OutOfOperator<Instance>>> {
   previous: Previous
+}
+
+export interface IPipedOperator<Previous extends Operator, Instance extends Operator> extends IOperator<OutOfOperator<PreviousOf<Instance>>, OutOfOperator<Instance>, UnaryFunction<InOfOperator<Previous>, OutOfOperator<Instance>>> {
+  last: Instance & IChainedOperator<Previous, Instance>
 }
 
 export type InOfOperator<Op> = InOf<MorphismOf<Op>>
@@ -90,4 +94,7 @@ export type OutOf<C> = C extends ICallMonad<infer In, infer Out> ? Out :
   C extends UnaryFunction<infer In, infer Out> ? Out :
   C extends IExecutable<infer M> ? M extends ICallMonad<any, infer Out> ? Out : any :
   any
-export type PreviousOf<C> = C extends IHasPrevious<infer Previous> ? Previous : any
+export type PreviousOf<C> =
+  C extends IHasPrevious<infer Previous> ? Previous :
+  C extends ChainedOperator<infer Previous> ? Previous :
+  any
