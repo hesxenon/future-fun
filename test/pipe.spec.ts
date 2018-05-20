@@ -33,21 +33,17 @@ describe('piping', () => {
     assert(a.pipe(quadruple).with(1).exec() === 4)
   })
 
-  describe('pipe util', () => {
-    it('should pipe multiple operators', () => {
-      const a = Call.of(ident)
-      const b = Call.of(stringify)
-      const op1 = map(double)
-      const op2 = map(stringify)
-      const y = pipe(op1)(a)
-      const quadrupleStringify = pipe(op1, op2)
+  it('should be possible to test a piped chain', () => {
+    const a = Call.of(ident)
+    const op1 = map(double)
+    const op2 = map(stringify)
 
-      // assert(quadrupleStringify.morphism === stringify)
-      // assert(quadrupleStringify.previous.morphism === double)
-      // assert(quadrupleStringify.previous.previous.fn === ident)
-      // assert(testCall(quadrupleStringify, 1) === '1')
-      // assert(testCall(quadrupleStringify.previous, 1) === 2)
-      // assert(quadrupleStringify.with(2).exec() === '5')
-    })
+    const doubleStringify = pipe(op1, op2)
+
+    assert(doubleStringify.morphism === stringify)
+    assert(doubleStringify.previous.morphism === double)
+    assert(testCall(doubleStringify(a), 1) === '1')
+    assert(testCall(doubleStringify.previous(a), 1) === 2)
+    assert(a.pipe(doubleStringify).with(2).exec() === '4')
   })
 })

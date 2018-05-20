@@ -7,6 +7,11 @@ export const pipe: IPipe = (...operators: Operator[]) => {
     }
     return Object.assign(val, { previous: array[i - 1] })
   })
+  const last = chain[operators.length - 1]
+  // const morphism = (seed: any) => chain.reduce((y, { morphism: f }) => f(y))
 
-  return (<Instance extends M>(instance: Instance) => chain.reduce((instance, operator) => operator(instance), instance as M)) as IPipedOperator<any, any>
+  return Object.assign(
+    <Instance extends M>(instance: Instance) => chain.reduce((instance, operator) => operator(instance), instance as M),
+    last
+  ) as IPipedOperator<any, any>
 }
