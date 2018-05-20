@@ -6,7 +6,6 @@ import { IAll, ILift, M, Operator } from './types'
 export namespace Call {
   export const of: ILift = function (fn, thisArg?) {
     return {
-      fn,
       with: function (arg) {
         return {
           exec: () => fn.call(thisArg, arg),

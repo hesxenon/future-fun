@@ -1,5 +1,4 @@
 export interface ICallMonad<In, Out> {
-  fn: UnaryFunction<In, Out>
   with: <Instance extends this>(this: Instance, arg: In) => IExecutable<Instance>
   pipe: IBoundPipe
   map: <Instance extends this, Next>(this: Instance, morphism: UnaryFunction<Out, Next>) => IPipedCallMonad<In, Next, IOperator<Out, Next, UnaryFunction<Out, Next>>, Instance>
