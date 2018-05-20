@@ -50,9 +50,6 @@ export interface IBoundPipe {
   <I extends M>(...chained: Operator[]): IPipedCallMonad<InOf<I>, any, any, I>
 }
 
-// export type ReturnWith<Op extends Operator, Instance extends M> =
-// Op extends (arg: any) => infer R ? R extends IPipedCallMonad<any, infer Out, infer O, any> ? IPipedCallMonad<InOf<Instance>, Out, O, Instance> : any : any
-
 export interface IOperator<In, Out, Mo extends Morphism> {
   <Instance extends ICallMonad<any, In>>(instance: Instance): IPipedCallMonad<any, Out, IOperator<In, Out, Mo>, Instance>
   morphism: Mo
@@ -70,8 +67,7 @@ export type InOfOperator<Op> = Op extends IOperator<infer In, any, any> ? In : a
 export type OutOfOperator<Op> = Op extends IOperator<any, infer Out, any> ? Out : any
 export type FromOfOperator<Op> = InOf<MorphismOf<Op>>
 export type ToOfOperator<Op> = OutOf<MorphismOf<Op>>
-export type MorphismOf<Op> =
-  Op extends IOperator<any, any, infer Morphism> ? Morphism :
+export type MorphismOf<Op> = Op extends IOperator<any, any, infer Morphism> ? Morphism :
   any
 
 export interface NullaryFunction<Out> {
