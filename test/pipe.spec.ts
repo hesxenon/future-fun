@@ -1,6 +1,8 @@
 import { assert } from 'chai'
 import { Call, map, mapPromise, pipe } from '..'
 import { double, ident, stringify } from './test.util'
+import { testCall } from '../src/test'
+import { fail } from 'assert'
 
 describe('piping', () => {
   it('should enable the user to provide custom mapping operators', (done) => {
@@ -19,6 +21,16 @@ describe('piping', () => {
       assert(numbers.every(num => num === 2))
       done()
     })
+  })
+
+  it('should be possible to compose multiple operators into one', () => {
+    const a = Call.of(ident)
+    const quadruple = pipe(map((x: number) => {
+      return x * 2
+    }), map((x: number) => {
+      return x * 2
+    }))
+    assert(a.pipe(quadruple).with(1).exec() === 4)
   })
 
   describe('pipe util', () => {
