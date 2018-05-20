@@ -1,78 +1,76 @@
 import { assert } from 'chai'
-import { fail } from 'assert'
-import { Call, ICallMonad, OutOf, testCall } from '..'
-import { double, ident } from './test.util'
+import { Call } from '..'
+import { double, ident, increment, stringify } from './test.util'
 
 describe('Call', () => {
   describe('exec', () => {
     it('should not execute the callchain on setup', () => {
       let chainFirstCalled = false
-      const c = Call(x => {
+      const c = Call.of((x: number) => {
         chainFirstCalled = true
         return x
-      }, 1).chain(x => Call(double, x))
+      }).chain(Call.of(double))
 
       let mapFirstCalled = false
-      const d = Call(x => {
+      const d = Call.of((x: number) => {
         mapFirstCalled = true
         return x
-      }, 1).map(double)
+      }).map(double)
 
       assert(!chainFirstCalled)
       assert(!mapFirstCalled)
     })
 
     it('should execute the whole callchain on valueOf()', () => {
-      const c = Call(x => x, 1).map(x => x * 2).chain(x => Call(x => x + '', x))
-      assert(c.valueOf() === '2')
+      const c = Call.of((x: number) => x).map(x => x * 2).chain(Call.of(x => x + ''))
+      assert(c.with(1) === '2')
     })
   })
 
   describe('map', () => {
     it('should execute directly to a value', () => {
-      const c = Call(ident, 1).map(double)
-      assert(c.valueOf() === 2)
-      assert(c.map(double).valueOf() === 4)
+      const c = Call.of(ident).map(double)
+      assert(c.with(1) === 2)
+      assert(c.map(double).with(1) === 4)
     })
   })
 
   describe('chain', () => {
     it('should execute directly to a value', () => {
-      const c = Call(ident, 1).chain(x => Call(double, x))
-      assert(c.valueOf() === 2)
+      const c = Call.of(ident).chain(Call.of(double))
+      assert(c.with(1) === 2)
     })
 
     it('should create a reference to the current instance', () => {
-      const callToString = (x: number) => Call(toString, x)
-      const callDouble = (x: number) => Call(x => x * 2, x)
-      const a = Call(ident, 1 as number)
+      const callToString = Call.of(stringify)
+      const callDouble = Call.of(double)
+      const a = Call.of(ident)
       const b = a.chain(callDouble)
       const c = b.chain(callToString)
 
       // if a -> b -> c then c <- b <- a must also be true and represented via .arg
-      assert(b.arg === a)
-      assert(c.arg === b)
-      assert(c.arg.arg === a)
+      assert(b.previous === a)
+      assert(c.previous === b)
+      assert(c.previous.previous === a)
     })
 
     it('should be possible to chain to any call as long as it resolves to the same type', () => {
-      const a = Call(x => x, 1)
-      const f = (x: number) => Call(double, x)
-      const g = (x: number) => Call(ident, x).map(x => x + 1)
-      const b = a.chain(x => x > 1 ? f(x) : g(x))
-      assert(b.fn(Call(x => x, 5)) === 10)
-      assert(b.fn(Call(x => x, 0)) === 1)
+      const a = Call.of(ident)
+      const conditional = Call.of((x: number) => x > 1 ? double(x) : stringify(x))
+      const b = a.chain(conditional)
+      assert(b.with(5) === 10)
+      assert(b.with(0) === '0')
     })
   })
 
   describe('all', () => {
     const object = {}
-    const a = Call(x => x, '1')
-    const b = Call(x => x, 1)
-    const c = Call(x => x, object)
+    const a = Call.of((x: number) => x)
+    const b = Call.of((x: string) => x)
+    const c = Call.of((x: Object) => x)
 
     it('should be possible to aggregate an array of calls into a single call with all results', () => {
-      const [str, num, obj] = Call.all(a, b, c).valueOf()
+      const [str, num, obj] = Call.all(b, a, c).with(['1', 1, object])
       assert(str === '1')
       assert(num === 1)
       assert(obj === object)
@@ -80,23 +78,22 @@ describe('Call', () => {
   })
 
   describe('identity laws', () => {
-    const unit = (x: number) => Call(ident, x)
+    const unit = Call.of(ident)
+    const x = 1 as number
     it('should satisfy left identity', () => {
-      const f = (x: number) => Call(double, x)
-      const x = 1 as number
-      assert(unit(x).chain(f).valueOf() === f(x).valueOf())
+      const f = Call.of(double)
+      assert(unit.chain(f).with(x) === f.with(x))
     })
 
     it('should satisfy right identity', () => {
-      const c = Call(ident, 1 as number)
-      assert(c.chain(unit).valueOf() === c.valueOf())
+      const f = Call.of(double)
+      assert(f.chain(unit).with(x) === f.with(x))
     })
 
     it('should satisfy associativity', () => {
-      const c = unit(1)
-      const f = (x: number) => Call(double, x)
-      const g = (x: number) => Call(x => x + 1, x)
-      assert(c.chain(f).chain(g).valueOf() === c.chain(x => f(x).chain(g)).valueOf())
+      const f = Call.of(double)
+      const g = Call.of(increment)
+      assert(unit.chain(f).chain(g).with(x) === unit.chain(f.chain(g)).with(x))
     })
   })
 })

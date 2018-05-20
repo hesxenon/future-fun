@@ -1,24 +1,18 @@
-import { ICallMonad, OutOf, Call, IChainedCallMonad, IMappedCallMonad } from '..'
+import { ICallMonad, IPipedCallMonad, InOfOperator, M, NullaryFunction, Operator, OutOfOperator, UnaryFunction } from './types'
 
-export function testCall<In extends ICallMonad<any, any>, Out, Next> (call: IChainedCallMonad<In, Out, Next>, arg: OutOf<In>): ReturnType<typeof call['chainFn']>
-export function testCall<In extends ICallMonad<any, any>, Out> (call: IMappedCallMonad<In, Out>, arg: OutOf<In>): Out
+export function testCall<In, Next, Instance extends M, Op extends Operator<any, any, NullaryFunction<any>>> (call: IPipedCallMonad<In, Next, Op, Instance>): OutOfOperator<Op>
+export function testCall<In, Next, Instance extends M, Op extends Operator<any, any, UnaryFunction<any, any>>> (call: IPipedCallMonad<In, Next, Op, Instance>, arg: InOfOperator<Op>): OutOfOperator<Op>
 export function testCall<In, Out> (call: ICallMonad<In, Out>, arg: In): Out
-export function testCall<In, Out> (call: All, arg: OutOf<In>): Out | ICallMonad<OutOf<In>, Out> {
-  if (isMapped(call)) {
-    return call.mapFn(arg)
-  } else if (isChained(call)) {
-    return call.chainFn(arg)
+export function testCall<In, Out> (call: M, arg?: any): any {
+  if (isPiped(call)) {
+    return call.operator.morphism(arg)
   }
-  return Call(call.fn, arg, call.thisArg).valueOf()
+  return call.with(arg)
 }
 
-function isMapped (c: All): c is IMappedCallMonad<any, any> {
-  return (c as IMappedCallMonad<any, any>).mapFn !== undefined
+function isPiped (c: All): c is IPipedCallMonad<any, any, any, any> {
+  return (c as PM).operator !== undefined
 }
 
-function isChained (c: All): c is IChainedCallMonad<any, any, any> {
-  return (c as IChainedCallMonad<any, any, any>).chainFn !== undefined
-}
-
-type MappedOrChained = IChainedCallMonad<any, any, any> | IMappedCallMonad<any, any>
-type All = ICallMonad<any, any> | MappedOrChained
+type All = M | PM
+type PM = IPipedCallMonad<any, any, any, any>
