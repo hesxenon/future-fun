@@ -1,6 +1,7 @@
 import { flatMapTo } from './operators/flatMapTo'
 import { map } from './operators/map'
-import { IAll, ILift, M } from './types'
+import { IAll, ILift, M, Operator } from './types'
+import { pipe } from '..'
 
 export namespace Call {
   export const of: ILift = function (fn, thisArg?) {
@@ -16,7 +17,10 @@ export namespace Call {
         return map(morphism)(this)
       },
       chain: function (chained) {
-        return flatMapTo(chained)(this) // TODO check why Out cannot be assigned to InOf<typeof piped>
+        return flatMapTo(chained)(this)
+      },
+      pipe: function (...operators: Operator[]) {
+        return pipe(...operators)(this) as any // is there even a way to return this without knowing the exact overload?
       }
     }
   }
