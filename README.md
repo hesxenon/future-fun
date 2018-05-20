@@ -51,7 +51,7 @@ Call.of: <In, Out>(fn: (arg: In) => Out, thisArg?: any) => ICallMonad<In, Out>
 * `thisArg?` - an optional argument on which `fn` will be called. Necessary if you want to pass a function from a certain object i.e. `Promise.resolve` needs `Promise` as `thisArg`
 
 ### Output
-An `ICallMonad<In, Out>` representing the `fn` as well as the context that enables you to `.map` and `.chain` your `fn`
+An `ICallMonad<In, Out>` representing the `fn` as well as the context that enables you to `.map`, `.chain` and `.pipe` your `fn`
 
 ---
 
@@ -63,9 +63,9 @@ Call.all: (...calls: ICallMonad<any, any>[]): ICallMonad<any[], any[]>
 ### Input
 * `...calls` - the `ICallMonad`s to aggregate
 ### Output
-A new `ICallMonad` that takes all the passed calls as its argument and returns all their results if executed
+A new `ICallMonad` that takes an array of all the arguments of the passed calls as its argument and returns all their results
 
-##### note: currently typesafe for up to five calls
+##### note: currently typesafe for up to five calls but can be used with any number of calls
 
 ---
 
@@ -101,7 +101,7 @@ Another `IChainedCallMonad<In, Next, Instance>` where `Instance` is the instance
 ## Call.with
 _Unwrap the monads value: M(a) -> a_
 ```typescript
-Call.with: (arg: In) => Out
+Call.with: <Instance extends this>(this: Instance, arg: In) => Out
 ```
 ### Input
 * `arg` - the parameter of the FIRST call in the callchain.
@@ -111,14 +111,12 @@ The final value after running through the entire list of actions as defined
 ## Call.pipe
 _transform the result with more complex operators _
 ```typescript
-Call.pipe: <Instance extends this, Next>(this: Instance, op: IOperator<Out, Next>) => IMappedCallMonad<In, Next, Instance>
+Call.pipe: <Instance extends ICallMonad<any, any>(this: Instance, ...operators: Operator[]): IPipedCallMonad<InOf<I>, any, any, I>
 ```
 ### Input
-* `op` - an `IOperator<Out, Next>` where `Out` is the value of the current call and `Next` is the mapped value. See [operators](##Operators)
+* `operators` - any number of `IOperator<In, Out, Morphism>` where `In` is the value of the current call and `Out` is the mapped value. `Morphism` provides information about the actual functions that lead to `Out`. See [operators](##Operators)
 ### Output
-A mapped call that will map based on whatever you implement
+An `IPipedCallMonad` that will run through all the operators you provided
 
 ## Operators
-An operator is meant to map a given result to another output, specifically to an output based on a morphism that's passed beforehand. This is easier explained with a demo, so see [pipe.spec.ts](./test/pipe.spec.ts) and [mapPromise.spec.ts](./src/operators/mapPromise.ts)
-
-The `mapPromise` function takes an arbitrary morphism and applies it to the result of a promise that will be returned by the call on which pipe was called.
+Operators are at the heart of this library and are basically functions that take any instance of an `ICallMonad` and transform the instance into another `IPipedCallMonad`. This can happen based on any morphism you want to implement or statically for things you need really often. *The returned `IPipepCallMonad` should know about the operator that created it*. This is so that you can test every step of the callchain.
