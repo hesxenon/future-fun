@@ -66,8 +66,10 @@ export interface IPipedOperator<Previous extends Operator, Instance extends Oper
   last: Instance & IChainedOperator<Previous, Instance>
 }
 
-export type InOfOperator<Op> = InOf<MorphismOf<Op>>
-export type OutOfOperator<Op> = OutOf<MorphismOf<Op>>
+export type InOfOperator<Op> = Op extends IOperator<infer In, any, any> ? In : any
+export type OutOfOperator<Op> = Op extends IOperator<any, infer Out, any> ? Out : any
+export type FromOfOperator<Op> = InOf<MorphismOf<Op>>
+export type ToOfOperator<Op> = OutOf<MorphismOf<Op>>
 export type MorphismOf<Op> =
   Op extends IOperator<any, any, infer Morphism> ? Morphism :
   any
