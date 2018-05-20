@@ -1,6 +1,6 @@
-import { Call, flatMap } from '..'
-import { ident, double, stringify } from './test.util'
 import { assert } from 'chai'
+import { Call, flatMap } from '..'
+import { double, ident, stringify } from './test.util'
 
 describe('flatMap', () => {
   const unit = Call.of(ident)

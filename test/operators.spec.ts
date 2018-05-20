@@ -1,6 +1,6 @@
-import { map, Call } from '..'
-import { double, ident } from './test.util'
 import { assert } from 'chai'
+import { Call, map } from '..'
+import { double, ident } from './test.util'
 
 describe('operators', () => {
   it('should simply wrap a morphism', () => {

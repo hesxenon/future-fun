@@ -1,6 +1,6 @@
-import { Call, flatMap, mapPromise } from '..'
-import { ident, double } from './test.util'
 import { assert } from 'chai'
+import { Call, mapPromise } from '..'
+import { double, ident } from './test.util'
 
 describe('mapPromise', () => {
   const unit = Call.of(ident)

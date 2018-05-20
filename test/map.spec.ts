@@ -1,6 +1,6 @@
-import { Call, map } from '..'
-import { ident, double } from './test.util'
 import { assert } from 'chai'
+import { Call, map } from '..'
+import { double, ident } from './test.util'
 
 describe('map', () => {
   it('should map the value of a ICallMonad', () => {

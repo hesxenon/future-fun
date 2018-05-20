@@ -1,5 +1,5 @@
 import { Call } from '../..'
-import { IOperator, IPipedCallMonad, M, NullaryFunction, OutOf, UnaryFunction, InOf, ICallMonad, Morphism } from '../types'
+import { ICallMonad, IOperator, Morphism, NullaryFunction, UnaryFunction } from '../types'
 
 export function createOperator<In, Out, To> (morphism: NullaryFunction<To>, fn: (result: In) => Out): IOperator<In, Out, typeof morphism>
 export function createOperator<In, Out, From, To> (morphism: UnaryFunction<From, To>, fn: (result: In) => Out): IOperator<In, Out, typeof morphism>

@@ -1,4 +1,4 @@
-import { ICallMonad, IPipedCallMonad, InOfOperator, M, Operator, OutOfOperator, UnaryFunction, NullaryFunction } from './types'
+import { ICallMonad, IPipedCallMonad, InOfOperator, M, NullaryFunction, Operator, OutOfOperator, UnaryFunction } from './types'
 
 export function testCall<In, Next, Instance extends M, Op extends Operator<any, any, NullaryFunction<any>>> (call: IPipedCallMonad<In, Next, Op, Instance>): OutOfOperator<Op>
 export function testCall<In, Next, Instance extends M, Op extends Operator<any, any, UnaryFunction<any, any>>> (call: IPipedCallMonad<In, Next, Op, Instance>, arg: InOfOperator<Op>): OutOfOperator<Op>

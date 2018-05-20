@@ -1,4 +1,4 @@
-import { IPipe, IPipedOperator, M, Operator, IChainedOperator } from '../types'
+import { IChainedOperator, IPipe, IPipedOperator, M, Operator } from '../types'
 
 export const pipe: IPipe = (...operators: Operator[]) => {
   const chain: IChainedOperator<any, any>[] = operators.map((operator, i, array) => {

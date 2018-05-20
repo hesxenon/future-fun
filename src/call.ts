@@ -1,7 +1,7 @@
+import { pipe } from '..'
 import { flatMapTo } from './operators/flatMapTo'
 import { map } from './operators/map'
 import { IAll, ILift, M, Operator } from './types'
-import { pipe } from '..'
 
 export namespace Call {
   export const of: ILift = function (fn, thisArg?) {
