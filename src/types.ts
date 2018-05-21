@@ -28,10 +28,10 @@ export interface IAll {
 
 export interface IPipe {
   (op1: IOperator<any, any, any>): typeof op1
-  <O1, M1 extends Morphism, O2, M2 extends Morphism>(op1: IOperator<any, O1, M1>, op2: IOperator<O1, O2, M2>): IPipedOperator<typeof op1, typeof op2>
-  <O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism>(op1: IOperator<any, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>): IPipedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>
-  <O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism>(op1: IOperator<any, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>): IPipedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>
-  <O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism, O5, M5 extends Morphism>(op1: IOperator<any, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>, op5: IOperator<O4, O5, M5>): IPipedOperator<IChainedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>, typeof op5>
+  <I, O1, M1 extends Morphism, O2, M2 extends Morphism>(op1: IOperator<I, O1, M1>, op2: IOperator<O1, O2, M2>): IPipedOperator<typeof op1, typeof op2>
+  <I, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism>(op1: IOperator<I, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>): IPipedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>
+  <I, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism>(op1: IOperator<I, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>): IPipedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>
+  <I, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism, O5, M5 extends Morphism>(op1: IOperator<I, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>, op5: IOperator<O4, O5, M5>): IPipedOperator<IChainedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>, typeof op5>
   (...operators: Operator[]): Operator
 }
 
@@ -53,7 +53,7 @@ export interface IChainedOperator<Previous extends Operator, Instance extends Op
   previous: Previous
 }
 
-export interface IPipedOperator<Previous extends Operator, Instance extends Operator> extends IOperator<OutOfOperator<PreviousOf<Instance>>, OutOfOperator<Instance>, UnaryFunction<InOf<MorphismOf<Previous>>, OutOf<MorphismOf<Instance>>>> {
+export interface IPipedOperator<Previous extends Operator, Instance extends Operator> extends IOperator<InOfOperator<Previous>, OutOfOperator<Instance>, UnaryFunction<InOf<MorphismOf<Previous>>, OutOf<MorphismOf<Instance>>>> {
   last: Instance & IChainedOperator<Previous, Instance>
 }
 
