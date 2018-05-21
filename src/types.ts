@@ -49,11 +49,11 @@ export interface IOperator<In, Out, Mo extends Morphism> {
   morphism: Mo
 }
 
-export interface IChainedOperator<Previous extends Operator, Instance extends Operator> extends IOperator<OutOfOperator<Previous>, OutOfOperator<Instance>, UnaryFunction<InOfOperator<Previous>, OutOfOperator<Instance>>> {
+export interface IChainedOperator<Previous extends Operator, Instance extends Operator> extends IOperator<OutOfOperator<Previous>, OutOfOperator<Instance>, UnaryFunction<InOf<MorphismOf<Previous>>, OutOf<MorphismOf<Instance>>>> {
   previous: Previous
 }
 
-export interface IPipedOperator<Previous extends Operator, Instance extends Operator> extends IOperator<OutOfOperator<PreviousOf<Instance>>, OutOfOperator<Instance>, UnaryFunction<InOfOperator<Previous>, OutOfOperator<Instance>>> {
+export interface IPipedOperator<Previous extends Operator, Instance extends Operator> extends IOperator<OutOfOperator<PreviousOf<Instance>>, OutOfOperator<Instance>, UnaryFunction<InOf<MorphismOf<Previous>>, OutOf<MorphismOf<Instance>>>> {
   last: Instance & IChainedOperator<Previous, Instance>
 }
 
