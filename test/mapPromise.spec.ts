@@ -11,4 +11,12 @@ describe('mapPromise', () => {
       done()
     })
   })
+
+  it('should map to the resolved value of a nested promise', (done) => {
+    const a = Call.of((result: number) => Promise.resolve(result)).pipe(mapPromise(x => Promise.resolve(Promise.resolve(x))))
+    a.with(1).then(resolved => {
+      assert(resolved === 1)
+      done()
+    })
+  })
 })
