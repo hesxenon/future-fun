@@ -50,7 +50,7 @@ describe('piping', () => {
   })
 
   it('should create a new morphism as the composition of all inner morphisms', () => {
-    const doubleStringify = pipe(map(double), map(stringify))
+    const doubleStringify = pipe(mapPromise(double), mapPromise(stringify))
     assert(doubleStringify.morphism(1) === '2')
   })
 })
