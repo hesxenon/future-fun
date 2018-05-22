@@ -32,7 +32,6 @@ describe('piping', () => {
   })
 
   it('should be possible to access each operator of a piped chain', () => {
-    const a = Call.of(ident)
     const odouble = map(double)
     const ostringify = map(stringify)
     const oparseInt = map(parseInt)
@@ -52,5 +51,18 @@ describe('piping', () => {
   it('should create a new morphism as the composition of all inner morphisms', () => {
     const doubleStringify = pipe(mapPromise(double), mapPromise(stringify))
     assert(doubleStringify.morphism(1) === '2')
+  })
+
+  it('should not have nested instances as the previous call', () => {
+    const a = Call.of(ident)
+    const quadruple = pipe(map(double), map(double))
+    const quadString = pipe(quadruple, map(stringify))
+    const b = a.pipe(quadruple)
+    const c = quadruple(a)
+    const d = quadString(a)
+
+    assert(b.previous === a)
+    assert(c.previous === a)
+    assert(d.previous === a)
   })
 })
