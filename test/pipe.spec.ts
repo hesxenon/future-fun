@@ -65,4 +65,11 @@ describe('piping', () => {
     assert(c.previous === a)
     assert(d.previous === a)
   })
+
+  it('should have a piped operator with a "last" property', () => {
+    const a = Call.of(ident)
+    const b = a.pipe(map(double), map(stringify))
+
+    assert(b.operator.last)
+  })
 })

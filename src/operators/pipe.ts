@@ -1,4 +1,5 @@
 import { IChainedOperator, IPipe, IPipedOperator, M, Operator } from '../types'
+import { createOperator } from './util'
 
 /**
  * pipe creates a new operator from the passed in operators that has the original instance as its previous instance
@@ -14,12 +15,15 @@ export const pipe: IPipe = (...operators: Operator[]) => {
     }
     return Object.assign(operator, { previous: array[i - 1] })
   })
-  const morphism = (seed: any) => chain.reduce((y, { morphism: f }) => f(y), seed)
+
+  const finalMorphism = (seed: any) => chain.reduce((y, { morphism: f }) => f(y), seed)
+  const finalOperator: IPipedOperator<any, any> = Object.assign(createOperator(finalMorphism, finalMorphism), { last: chain[chain.length - 1] })
 
   return Object.assign(
-    <Instance extends M>(instance: Instance) => {
-      return Object.assign(chain.reduce((instance, operator) => operator(instance), instance as M), { previous: instance })
+    function <Instance extends M>(instance: Instance) {
+      const finalCall = chain.reduce((instance, operator) => operator(instance), instance as M)
+      return Object.assign(finalCall, { previous: instance, operator: finalOperator })
     },
-    { morphism, last: chain[chain.length - 1] }
-  ) as IPipedOperator<any, any>
+    { morphism: finalMorphism, last: chain[chain.length - 1] }
+  )
 }
