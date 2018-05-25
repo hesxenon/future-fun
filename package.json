@@ -1,6 +1,6 @@
 {
   "name": "future-fun",
-  "version": "4.1.6",
+  "version": "4.1.7",
   "description": "a way to abstract calls and chain them for easier unit testing and deferred execution",
   "main": "index.js",
   "scripts": {

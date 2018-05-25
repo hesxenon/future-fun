@@ -28,21 +28,23 @@ export interface IAll {
 
 export interface IPipe {
   (op1: IOperator<any, any, any>): typeof op1
-  <I, O1, M1 extends Morphism, O2, M2 extends Morphism>(op1: IOperator<I, O1, M1>, op2: IOperator<O1, O2, M2>): IPipedOperator<typeof op1, typeof op2>
-  <I, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism>(op1: IOperator<I, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>): IPipedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>
-  <I, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism>(op1: IOperator<I, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>): IPipedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>
-  <I, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism, O5, M5 extends Morphism>(op1: IOperator<I, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>, op5: IOperator<O4, O5, M5>): IPipedOperator<IChainedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>, typeof op5>
+  <O1 extends Operator, O2 extends WO<O1>>(op1: O1, op2: O2): IPipedOperator<typeof op1, typeof op2>
+  <O1 extends Operator, O2 extends WO<O1>, O3 extends WO<O2>>(op1: O1, op2: O2, op3: O3): IPipedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>
+  <O1 extends Operator, O2 extends WO<O1>, O3 extends WO<O2>, O4 extends WO<O3>>(op1: O1, op2: O2, op3: O3, op4: O4): IPipedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>
+  <O1 extends Operator, O2 extends WO<O1>, O3 extends WO<O2>, O4 extends WO<O3>, O5 extends WO<O4>>(op1: O1, op2: O2, op3: O3, op4: O4, op5: O5): IPipedOperator<IChainedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>, typeof op5>
   (...operators: Operator[]): Operator
 }
 
 export interface IBoundPipe {
-  <I extends M, O1, M1 extends Morphism>(this: I, op1: IOperator<OutOf<I>, O1, M1>): IPipedCallMonad<InOf<I>, O1, typeof op1, I>
-  <I extends M, O1, M1 extends Morphism, O2, M2 extends Morphism>(this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>): IPipedCallMonad<InOf<I>, O2, IPipedOperator<typeof op1, typeof op2>, I>
-  <I extends M, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism>(this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>): IPipedCallMonad<InOf<I>, O3, IPipedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, I>
-  <I extends M, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism>(this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>): IPipedCallMonad<InOf<I>, OutOfOperator<O2>, IPipedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>, I>
-  <I extends M, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism, O5, M5 extends Morphism>(this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>, op5: IOperator<O4, O5, M5>): IPipedCallMonad<InOf<I>, OutOfOperator<O2>, IPipedOperator<IChainedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>, typeof op5>, I>
+  <I extends M, O1 extends Operator<OutOf<I>>>(this: I, op1: O1): IPipedCallMonad<InOf<I>, OutOfOperator<O1>, typeof op1, I>
+  <I extends M, O1 extends Operator<OutOf<I>>, O2 extends WO<O1>>(this: I, op1: O1, op2: O2): IPipedCallMonad<InOf<I>, OutOfOperator<O2>, IPipedOperator<typeof op1, typeof op2>, I>
+  <I extends M, O1 extends Operator<OutOf<I>>, O2 extends WO<O1>, O3 extends WO<O2>>(this: I, op1: O1, op2: O2, op3: O3): IPipedCallMonad<InOf<I>, OutOfOperator<O3>, IPipedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, I>
+  <I extends M, O1 extends Operator<OutOf<I>>, O2 extends WO<O1>, O3 extends WO<O2>, O4 extends WO<O3>>(this: I, op1: O1, op2: O2, op3: O3, op4: O4): IPipedCallMonad<InOf<I>, OutOfOperator<O4>, IPipedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>, I>
+  <I extends M, O1 extends Operator<OutOf<I>>, O2 extends WO<O1>, O3 extends WO<O2>, O4 extends WO<O3>, O5 extends WO<O4>>(this: I, op1: O1, op2: O2, op3: O3, op4: O4, op5: O5): IPipedCallMonad<InOf<I>, OutOfOperator<O5>, IPipedOperator<IChainedOperator<IChainedOperator<IChainedOperator<typeof op1, typeof op2>, typeof op3>, typeof op4>, typeof op5>, I>
   <I extends M>(this: I, ...operators: Operator[]): IPipedCallMonad<InOf<I>, any, any, I>
 }
+
+export type WO<O extends Operator> = IOperator<OutOfOperator<O>, any, any>
 
 export interface IOperator<In, Out, Mo extends Morphism> {
   <Instance extends ICallMonad<any, In>>(instance: Instance): IPipedCallMonad<any, Out, IOperator<In, Out, Mo>, Instance>
