@@ -1,6 +1,7 @@
-import { ICallMonad, IOperator, OutOf, UnaryFunction } from '../types'
+import { map } from './map'
+import { UnaryFunction, ICallMonad, IOperator } from '../types'
 import { createOperator } from './util'
 
-export function flatMap<From, To extends ICallMonad<From, any>> (morphism: UnaryFunction<From, To>): IOperator<From, OutOf<To>, UnaryFunction<From, To>> {
-  return createOperator(morphism, result => morphism(result).with(result))
+export function flatMap<From, To> (morphism: UnaryFunction<From, ICallMonad<To, From>>): IOperator<From, To, typeof morphism> {
+  return createOperator(morphism, result => morphism(result)(result))
 }

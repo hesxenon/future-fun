@@ -8,10 +8,10 @@ describe('operators', () => {
     assert(odouble.morphism === double)
   })
 
-  it('should return a function that can transform one call into a new one', () => {
+  it('should be able to transform a call into a new one', () => {
     const a = Call.of(ident)
     const b = map(double)(a)
     assert(a !== b)
-    assert(b.previous === a)
+    assert(b(1) === 2)
   })
 })

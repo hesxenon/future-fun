@@ -1,6 +1,6 @@
 import { fail } from 'assert'
 import { assert } from 'chai'
-import { Call } from '..'
+import { Call, map, flatMap } from '..'
 import { testCall } from '../src/test'
 import { double, ident, stringify } from './test.util'
 
@@ -23,19 +23,21 @@ describe('demo', () => {
       return Promise.resolve('b64://img/' + id)
     })
 
-    const fetchAndFilter = (filter: string) => fetchDb.map(x$ => x$.then((users) => {
+    const fetchAndFilter = (filter: string) => fetchDb.pipe(map(x$ => x$.then((users) => {
       return users.filter(({ name }) => name.startsWith(filter))
-        .map(u => fetchAvatar
-          .map(av$ => av$.then((avatar) => {
+        .map(u =>
+          fetchAvatar.pipe(map(av$ => av$.then((avatar) => {
             return u.name + avatar
           })))
-    }))
+        )
+    })))
     const c = fetchAndFilter(str)
     const countOfExpectedCalls = mockUser.filter(({ name }) => name.startsWith(str)).length
 
     testCall(c, Promise.resolve(mockUser))
       .then(avatarCalls => {
         assert(avatarCalls.length === countOfExpectedCalls)
+        assert(avatarCalls.every(call => call.previous === fetchAvatar))
       })
   })
 
@@ -43,30 +45,13 @@ describe('demo', () => {
     const c = Call.of((x: number) => {
       fail('this should not be called!')
       return x
-    }).map(double)
+    }).pipe(map(double))
     assert(testCall(c, 2) === 4)
   })
 
-  it('should return the chained call', () => {
-    const cdouble = Call.of(double)
-    const a = Call.of(ident).chain(cdouble)
-    assert(testCall(a.operator.morphism(), 1) === 2)
-    assert(a.operator.morphism() === cdouble)
-  })
-
   it('should directly return the result of the mapped call', () => {
-    const c = Call.of(ident).map(stringify)
+    const c = Call.of(ident).pipe(map(stringify))
     assert(testCall(c, 3) === '3')
-  })
-
-  it('should be possible to test the callchain of a nested call', () => {
-    const cdouble = Call.of(double)
-    const doubleString = cdouble.map(stringify)
-    const c = Call.of(ident).chain(doubleString)
-    const chainedCall = c.operator.morphism()
-    assert(chainedCall === doubleString)
-    assert(chainedCall.operator.morphism === stringify)
-    assert(chainedCall.previous === cdouble)
   })
 
   describe('test save', () => {
@@ -81,13 +66,13 @@ describe('demo', () => {
         fail('this should not be called')
         return save(num)
       }
-      const doubleAndSave = Call.of(double).chain(Call.of(failOnSave))
+      Call.of(double).pipe(map(Call.of(failOnSave)))
     })
 
     it('should be possible to test the response of save seperately', () => {
       const saveAndReturnId = Call.of(double)
-        .chain(Call.of(save))
-        .map(res$ => res$.then(res => res.id))
+        .pipe(map(save))
+        .pipe(map(res$ => res$.then(res => res.id)))
 
       // test a mocked response
       testCall(saveAndReturnId, Promise.resolve({ id: 1, num: 1 })).then(id => {
@@ -96,9 +81,9 @@ describe('demo', () => {
     })
 
     it('should be possible to execute save normally', () => {
-      const doubleAndSave = Call.of(double).chain(Call.of(save))
+      const doubleAndSave = Call.of(double).pipe(map(Call.of(save)))
       const expectedId = Object.keys(storage).length
-      doubleAndSave.with(2).then(({ id, num }) => {
+      doubleAndSave(2).then(({ id, num }) => {
         assert(num === 4)
         assert(id === expectedId)
       })
