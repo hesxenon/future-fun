@@ -1,6 +1,6 @@
 import { fail } from 'assert'
 import { assert } from 'chai'
-import { Call, map, flatMapTo } from '..'
+import { Call, map, flatMap } from '..'
 import { testCall } from '../src/test'
 import { double, ident, stringify } from './test.util'
 
@@ -66,7 +66,7 @@ describe('demo', () => {
         fail('this should not be called')
         return save(num)
       }
-      Call.of(double).pipe(flatMapTo(Call.of(failOnSave)))
+      Call.of(double).pipe(flatMap(Call.of(failOnSave)))
     })
 
     it('should be possible to test the response of save seperately', () => {
@@ -81,7 +81,7 @@ describe('demo', () => {
     })
 
     it('should be possible to execute save normally', () => {
-      const doubleAndSave = Call.of(double).pipe(flatMapTo(Call.of(save)))
+      const doubleAndSave = Call.of(double).pipe(flatMap(Call.of(save)))
       const expectedId = Object.keys(storage).length
       doubleAndSave(2).then(({ id, num }) => {
         assert(num === 4)
