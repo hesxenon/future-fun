@@ -1,27 +1,22 @@
-import { pipe } from '..'
-import { flatMapTo } from './operators/flatMapTo'
-import { map } from './operators/map'
-import { IAll, ILift, M, Operator } from './types'
+import { ILift, InOf, IOperator, aggregate, NullaryFunction, UnaryFunction, IAll } from '..'
+import { ICallMonad } from './types'
 
 export namespace Call {
-  export const of: ILift = function (fn, thisArg?) {
-    return {
-      with: function (arg) {
+  export const of: ILift = function <In, Out> (fn: NullaryFunction<Out> | UnaryFunction<In, Out>, thisArg?: any) {
+    return Object.assign(
+      function (arg: InOf<typeof fn>) {
         return fn.call(thisArg, arg)
       },
-      map: function (morphism) {
-        return map(morphism)(this)
-      },
-      chain: function (chained) {
-        return flatMapTo(chained)(this)
-      },
-      pipe: function (...operators: Operator[]) {
-        return pipe(...operators)(this) as any // is there even a way to return this without knowing the exact overload?
+      {
+        pipe: function (this: ICallMonad<any, any>, ...operators: IOperator<any, any, any>[]) {
+          const transform = aggregate(...operators)
+          return Object.assign(transform(this), { previous: this, unWrap: () => transform.morphism })
+        }
       }
-    }
+    )
   }
 
-  export const all: IAll = function (...calls: M[]): M {
-    return Call.of((args: any[]) => calls.map((call, i) => call.with(args[i])))
+  export const all: IAll = function (...calls: ICallMonad<any, any>[]): ICallMonad<any, any> {
+    return Call.of((args: any[]) => calls.map((call, i) => call(args[i])))
   }
 }

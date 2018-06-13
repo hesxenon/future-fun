@@ -6,7 +6,7 @@ describe('mapPromise', () => {
   const unit = Call.of(ident)
   it('should map the resolved value of a promise a promise that resolves with the mapped value', (done) => {
     const a = Call.of((result: number) => Promise.resolve(result)).pipe(mapPromise(double))
-    a.with(1).then(resolved => {
+    a(1).then(resolved => {
       assert(resolved === 2)
       done()
     })
@@ -14,7 +14,7 @@ describe('mapPromise', () => {
 
   it('should map to the resolved value of a nested promise', (done) => {
     const a = Call.of((result: number) => Promise.resolve(result)).pipe(mapPromise((x: number) => Promise.resolve(Promise.resolve(x))))
-    a.with(1).then(resolved => {
+    a(1).then(resolved => {
       assert(resolved === 1)
       done()
     })

@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import { Call } from '..'
+import { Call, flatMapTo, map } from '..'
 import { double, ident, increment, stringify } from './test.util'
 
 describe('Call', () => {
@@ -9,44 +9,44 @@ describe('Call', () => {
       const c = Call.of((x: number) => {
         chainFirstCalled = true
         return x
-      }).chain(Call.of(double))
+      }).pipe(flatMapTo(Call.of(double)))
 
       let mapFirstCalled = false
       const d = Call.of((x: number) => {
         mapFirstCalled = true
         return x
-      }).map(double)
+      }).pipe(map(double))
 
       assert(!chainFirstCalled)
       assert(!mapFirstCalled)
     })
 
     it('should execute the whole callchain on valueOf()', () => {
-      const c = Call.of((x: number) => x).map(x => x * 2).chain(Call.of(x => x + ''))
-      assert(c.with(1) === '2')
+      const c = Call.of((x: number) => x).pipe(map(x => x * 2)).pipe(flatMapTo(Call.of(stringify)))
+      assert(c(1) === '2')
     })
   })
 
   describe('map', () => {
     it('should execute directly to a value', () => {
-      const c = Call.of(ident).map(double)
-      assert(c.with(1) === 2)
-      assert(c.map(double).with(1) === 4)
+      const c = Call.of(ident).pipe(map(double))
+      assert(c(1) === 2)
+      assert(c.pipe(map(double))(1) === 4)
     })
   })
 
   describe('chain', () => {
     it('should execute directly to a value', () => {
-      const c = Call.of(ident).chain(Call.of(double))
-      assert(c.with(1) === 2)
+      const c = Call.of(ident).pipe(flatMapTo(Call.of(double)))
+      assert(c(1) === 2)
     })
 
     it('should create a reference to the current instance', () => {
       const callToString = Call.of(stringify)
       const callDouble = Call.of(double)
       const a = Call.of(ident)
-      const b = a.chain(callDouble)
-      const c = b.chain(callToString)
+      const b = a.pipe(flatMapTo(callDouble))
+      const c = b.pipe(flatMapTo(callToString))
 
       // if a -> b -> c then c <- b <- a must also be true and represented via .arg
       assert(b.previous === a)
@@ -57,9 +57,9 @@ describe('Call', () => {
     it('should be possible to chain to any call as long as it resolves to the same type', () => {
       const a = Call.of(ident)
       const conditional = Call.of((x: number) => x > 1 ? double(x) : stringify(x))
-      const b = a.chain(conditional)
-      assert(b.with(5) === 10)
-      assert(b.with(0) === '0')
+      const b = a.pipe(flatMapTo(conditional))
+      assert(b(5) === 10)
+      assert(b(0) === '0')
     })
   })
 
@@ -70,7 +70,7 @@ describe('Call', () => {
     const c = Call.of((x: Object) => x)
 
     it('should be possible to aggregate an array of calls into a single call with all results', () => {
-      const [str, num, obj] = Call.all(b, a, c).with(['1', 1, object])
+      const [str, num, obj] = Call.all(b, a, c)(['1', 1, object])
       assert(str === '1')
       assert(num === 1)
       assert(obj === object)
@@ -82,18 +82,20 @@ describe('Call', () => {
     const x = 1 as number
     it('should satisfy left identity', () => {
       const f = Call.of(double)
-      assert(unit.chain(f).with(x) === f.with(x))
+      assert(unit.pipe(flatMapTo(f))(x) === f(x))
     })
 
     it('should satisfy right identity', () => {
       const f = Call.of(double)
-      assert(f.chain(unit).with(x) === f.with(x))
+      assert(f.pipe(flatMapTo(unit))(x) === f(x))
     })
 
     it('should satisfy associativity', () => {
       const f = Call.of(double)
       const g = Call.of(increment)
-      assert(unit.chain(f).chain(g).with(x) === unit.chain(f.chain(g)).with(x))
+      const piped = unit.pipe(flatMapTo(f)).pipe(flatMapTo(g))
+      const nested = unit.pipe(flatMapTo(f.pipe(flatMapTo(g))))
+      assert(piped(x) === nested(x))
     })
   })
 })

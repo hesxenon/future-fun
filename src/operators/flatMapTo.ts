@@ -1,6 +1,6 @@
-import { IOperator, M, NullaryFunction, OutOf } from '../types'
+import { IOperator, NullaryFunction, OutOf, ICallMonad, UnaryFunction } from '../types'
 import { createOperator } from './util'
 
-export function flatMapTo<In, To extends M> (call: To): IOperator<any, OutOf<To>, NullaryFunction<To>> {
-  return createOperator(() => call, result => call.with(result))
+export function flatMapTo<From, To> (call: ICallMonad<To, From>): IOperator<From, To, UnaryFunction<From, To>> {
+  return createOperator(call, call)
 }

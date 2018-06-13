@@ -1,18 +1,17 @@
-import { ICallMonad, IPipedCallMonad, InOfOperator, M, NullaryFunction, Operator, OutOfOperator, UnaryFunction } from './types'
+import { ICallMonad, IPipedCallMonad, NullaryFunction, UnaryFunction, OutOf } from './types'
 
-export function testCall<In, Next, Instance extends M, Op extends Operator<any, any, NullaryFunction<any>>> (call: IPipedCallMonad<In, Next, Op, Instance>): OutOfOperator<Op>
-export function testCall<In, Next, Instance extends M, Op extends Operator<any, any, UnaryFunction<any, any>>> (call: IPipedCallMonad<In, Next, Op, Instance>, arg: InOfOperator<Op>): OutOfOperator<Op>
-export function testCall<In, Out> (call: ICallMonad<In, Out>, arg: In): Out
-export function testCall<In, Out> (call: M, arg?: any): any {
+export function testCall<Out, In> (call: ICallMonad<Out, In>, arg: In): Out
+export function testCall<Out, Previous extends ICallMonad<any, any>> (call: IPipedCallMonad<Out, Previous>, arg: OutOf<Previous>): Out
+export function testCall<Out, In, Previous extends ICallMonad<any, any>> (call: ICallMonad<Out, In> | IPipedCallMonad<Out, Previous>, arg: In | OutOf<Previous>) {
   if (isPiped(call)) {
-    return call.operator.morphism(arg)
+    return call.unWrap()(arg as OutOf<Previous>)
   }
-  return call.with(arg)
+  return call(arg as In)
 }
 
-function isPiped (c: All): c is IPipedCallMonad<any, any, any, any> {
-  return (c as PM).operator !== undefined
+function isPiped (call: ICallMonad<any, any> | IPipedCallMonad<any, any>): call is IPipedCallMonad<any, any> {
+  if ((call as IPipedCallMonad<any, any>).previous) {
+    return true
+  }
+  return false
 }
-
-type All = M | PM
-type PM = IPipedCallMonad<any, any, any, any>

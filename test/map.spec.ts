@@ -6,7 +6,7 @@ describe('map', () => {
   it('should map the value of a ICallMonad', () => {
     const a = Call.of(ident)
     const b = a.pipe(map(double))
-    assert(a.with(1) === 1)
-    assert(b.with(1) === 2)
+    assert(a(1) === 1)
+    assert(b(1) === 2)
   })
 })
