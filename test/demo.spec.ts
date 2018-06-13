@@ -66,7 +66,7 @@ describe('demo', () => {
         fail('this should not be called')
         return save(num)
       }
-      Call.of(double).pipe(flatMap(Call.of(failOnSave)))
+      Call.of(double).pipe(map(Call.of(failOnSave)))
     })
 
     it('should be possible to test the response of save seperately', () => {
@@ -81,7 +81,7 @@ describe('demo', () => {
     })
 
     it('should be possible to execute save normally', () => {
-      const doubleAndSave = Call.of(double).pipe(flatMap(Call.of(save)))
+      const doubleAndSave = Call.of(double).pipe(map(Call.of(save)))
       const expectedId = Object.keys(storage).length
       doubleAndSave(2).then(({ id, num }) => {
         assert(num === 4)

@@ -1,6 +1,7 @@
 import { assert } from 'chai'
-import { Call, flatMap, map } from '..'
+import { Call, map } from '..'
 import { double, ident, increment, stringify } from './test.util'
+import { flatMapTo } from '../src/operators/flatMapTo'
 
 describe('Call', () => {
   describe('exec', () => {
@@ -9,7 +10,7 @@ describe('Call', () => {
       const c = Call.of((x: number) => {
         chainFirstCalled = true
         return x
-      }).pipe(flatMap(Call.of(double)))
+      }).pipe(flatMapTo(Call.of(double)))
 
       let mapFirstCalled = false
       const d = Call.of((x: number) => {
@@ -22,7 +23,7 @@ describe('Call', () => {
     })
 
     it('should execute the whole callchain on valueOf()', () => {
-      const c = Call.of((x: number) => x).pipe(map(x => x * 2)).pipe(flatMap(Call.of(stringify)))
+      const c = Call.of((x: number) => x).pipe(map(x => x * 2)).pipe(flatMapTo(Call.of(stringify)))
       assert(c(1) === '2')
     })
   })
@@ -37,7 +38,7 @@ describe('Call', () => {
 
   describe('chain', () => {
     it('should execute directly to a value', () => {
-      const c = Call.of(ident).pipe(flatMap(Call.of(double)))
+      const c = Call.of(ident).pipe(flatMapTo(Call.of(double)))
       assert(c(1) === 2)
     })
 
@@ -45,19 +46,19 @@ describe('Call', () => {
       const callToString = Call.of(stringify)
       const callDouble = Call.of(double)
       const a = Call.of(ident)
-      const b = a.pipe(flatMap(callDouble))
-      const c = b.pipe(flatMap(callToString))
+      const b = a.pipe(flatMapTo(callDouble))
+      const c = b.pipe(flatMapTo(callToString))
 
-      // if a -> b -> c then c <- b <- a must also be true and represented via .arg
+      // if a -> b -> c then c <- b <- a must also be true and represented via .previous
       assert(b.previous === a)
       assert(c.previous === b)
       assert(c.previous.previous === a)
     })
 
-    it('should be possible to chain to any call as long as it resolves to the same type', () => {
+    it('should be possible to map to any call as long as it resolves to the same type', () => {
       const a = Call.of(ident)
       const conditional = Call.of((x: number) => x > 1 ? double(x) : stringify(x))
-      const b = a.pipe(flatMap(conditional))
+      const b = a.pipe(flatMapTo(conditional))
       assert(b(5) === 10)
       assert(b(0) === '0')
     })
@@ -82,19 +83,19 @@ describe('Call', () => {
     const x = 1 as number
     it('should satisfy left identity', () => {
       const f = Call.of(double)
-      assert(unit.pipe(flatMap(f))(x) === f(x))
+      assert(unit.pipe(flatMapTo(f))(x) === f(x))
     })
 
     it('should satisfy right identity', () => {
       const f = Call.of(double)
-      assert(f.pipe(flatMap(unit))(x) === f(x))
+      assert(f.pipe(flatMapTo(unit))(x) === f(x))
     })
 
     it('should satisfy associativity', () => {
       const f = Call.of(double)
       const g = Call.of(increment)
-      const piped = unit.pipe(flatMap(f)).pipe(flatMap(g))
-      const nested = unit.pipe(flatMap(f.pipe(flatMap(g))))
+      const piped = unit.pipe(flatMapTo(f)).pipe(flatMapTo(g))
+      const nested = unit.pipe(flatMapTo(f.pipe(flatMapTo(g))))
       assert(piped(x) === nested(x))
     })
   })
