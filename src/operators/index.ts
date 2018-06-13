@@ -3,4 +3,4 @@ export { flatMapTo } from './flatMapTo'
 export { map } from './map'
 export { mapPromise } from './mapPromise'
 
-export { pipe } from './pipe'
+export { aggregate } from './aggregate'
