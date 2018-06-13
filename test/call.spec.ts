@@ -76,6 +76,11 @@ describe('Call', () => {
       assert(num === 1)
       assert(obj === object)
     })
+
+    it('should be possible to access the aggregated calls from the resulting call', () => {
+      const all = Call.all(a.pipe(map(stringify)), b)
+      assert(all.calls[0].previous)
+    })
   })
 
   describe('identity laws', () => {

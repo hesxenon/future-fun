@@ -1,5 +1,5 @@
 import { ILift, InOf, IOperator, aggregate, NullaryFunction, UnaryFunction, IAll } from '..'
-import { ICallMonad } from './types'
+import { ICallMonad, IAllCallMonad } from './types'
 
 export namespace Call {
   export const of: ILift = function <In, Out> (fn: NullaryFunction<Out> | UnaryFunction<In, Out>, thisArg?: any) {
@@ -16,7 +16,9 @@ export namespace Call {
     )
   }
 
-  export const all: IAll = function (...calls: ICallMonad<any, any>[]): ICallMonad<any, any> {
-    return Call.of((args: any[]) => calls.map((call, i) => call(args[i])))
+  export const all: IAll = function (...calls: ICallMonad<any, any>[]): any {
+    return Object.assign(Call.of((args: any[]) => calls.map((call, i) => call(args[i]))), {
+      calls
+    })
   }
 }

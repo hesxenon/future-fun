@@ -1,11 +1,15 @@
-export interface ICallMonad<Out, In = undefined> {
+export interface ICallMonad<Out = any, In = any> {
   (arg: In): Out
   pipe: IPipe
 }
 
-export interface IPipedCallMonad<Out, Previous extends ICallMonad<any, any>> extends ICallMonad<Out, InOf<Previous>> {
+export interface IPipedCallMonad<Out, Previous extends ICallMonad> extends ICallMonad<Out, InOf<Previous>> {
   previous: Previous
   unWrap: () => (arg: OutOf<Previous>) => Out
+}
+
+export interface IAllCallMonad<Calls extends ICallMonad[]> extends ICallMonad<OutOfAll<Calls>, InOfAll<Calls>> {
+  calls: Calls
 }
 
 export interface ILift {
@@ -14,10 +18,11 @@ export interface ILift {
 }
 
 export interface IAll {
-  <I1, I2, O1, O2> (m1: ICallMonad<O1, I1>, m2: ICallMonad<O2, I2>): ICallMonad<[O1, O2], [I1, I2]>
-  <I1, I2, I3, O1, O2, O3> (m1: ICallMonad<O1, I1>, m2: ICallMonad<O2, I2>, m3: ICallMonad<O3, I3>): ICallMonad<[O1, O2, O3], [I1, I2, I3]>
-  <I1, I2, I3, I4, O1, O2, O3, O4> (m1: ICallMonad<O1, I1>, m2: ICallMonad<O2, I2>, m3: ICallMonad<O3, I3>, m4: ICallMonad<O4, I4>): ICallMonad<[O1, O2, O3, O4], [I1, I2, I3, I4]>
-  <I1, I2, I3, I4, I5, O1, O2, O3, O4, O5> (m1: ICallMonad<O1, I1>, m2: ICallMonad<O2, I2>, m3: ICallMonad<O3, I3>, m4: ICallMonad<O4, I4>, m5: ICallMonad<O5, I5>): ICallMonad<[O1, O2, O3, O4, O5], [I1, I2, I3, I4, I5]>
+  <M1 extends ICallMonad, M2 extends ICallMonad> (m1: M1, m2: M2): IAllCallMonad<[M1, M2]>
+  <M1 extends ICallMonad, M2 extends ICallMonad, M3 extends ICallMonad> (m1: M1, m2: M2, m3: M3): IAllCallMonad<[M1, M2, M3]>
+  <M1 extends ICallMonad, M2 extends ICallMonad, M3 extends ICallMonad, M4 extends ICallMonad> (m1: M1, m2: M2, m3: M3, m4: M4): IAllCallMonad<[M1, M2, M3, M4]>
+  <M1 extends ICallMonad, M2 extends ICallMonad, M3 extends ICallMonad, M4 extends ICallMonad, M5 extends ICallMonad> (m1: M1, m2: M2, m3: M3, m4: M4, m5: M5): IAllCallMonad<[M1, M2, M3, M4, M5]>
+  (...calls: ICallMonad[]): IAllCallMonad<typeof calls>
 }
 
 export interface IOperator<In, Out, M extends Morphism> {
@@ -59,3 +64,17 @@ export type OutOf<T> =
   T extends UnaryFunction<any, infer Out> ? Out :
   T extends NullaryFunction<infer Out> ? Out :
   any
+
+export type InOfAll<T> =
+  T extends [ICallMonad<any, infer I1>, ICallMonad<any, infer I2>] ? [I1, I2] :
+  T extends [ICallMonad<any, infer I1>, ICallMonad<any, infer I2>, ICallMonad<any, infer I3>] ? [I1, I2, I3] :
+  T extends [ICallMonad<any, infer I1>, ICallMonad<any, infer I2>, ICallMonad<any, infer I3>, ICallMonad<any, infer I4>] ? [I1, I2, I3, I4] :
+  T extends [ICallMonad<any, infer I1>, ICallMonad<any, infer I2>, ICallMonad<any, infer I3>, ICallMonad<any, infer I4>, ICallMonad<any, infer I5>] ? [I1, I2, I3, I4, I5] :
+  any[]
+
+export type OutOfAll<T> =
+  T extends [ICallMonad<infer O1>, ICallMonad<infer O2>] ? [O1, O2] :
+  T extends [ICallMonad<infer O1>, ICallMonad<infer O2>, ICallMonad<infer O3>] ? [O1, O2, O3] :
+  T extends [ICallMonad<infer O1>, ICallMonad<infer O2>, ICallMonad<infer O3>, ICallMonad<infer O4>] ? [O1, O2, O3, O4] :
+  T extends [ICallMonad<infer O1>, ICallMonad<infer O2>, ICallMonad<infer O3>, ICallMonad<infer O4>, ICallMonad<infer O5>] ? [O1, O2, O3, O4, O5] :
+  any[]
