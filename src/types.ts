@@ -1,11 +1,11 @@
-export interface ICallMonad<Out = any, In = any> {
-  (arg: In): Out
+export interface ICallMonad<Out = any, In = any, Root = In> {
+  (arg: Root): Out
   pipe: IPipe
+  _fn: (arg: In) => Out
 }
 
-export interface IPipedCallMonad<Out, Previous extends ICallMonad> extends ICallMonad<Out, InOf<Previous>> {
+export interface IPipedCallMonad<Out, Previous extends ICallMonad> extends ICallMonad<Out, OutOf<Previous>, InOf<Previous>> {
   previous: Previous
-  unWrap: () => (arg: OutOf<Previous>) => Out
 }
 
 export interface IAllCallMonad<Calls extends ICallMonad[]> extends ICallMonad<OutOfAll<Calls>, InOfAll<Calls>> {

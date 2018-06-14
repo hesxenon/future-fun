@@ -1,12 +1,7 @@
-import { ICallMonad, IPipedCallMonad, NullaryFunction, UnaryFunction, OutOf } from './types'
+import { ICallMonad, IPipedCallMonad } from './types'
 
-export function testCall<Out, In> (call: ICallMonad<Out, In>, arg: In): Out
-export function testCall<Out, Previous extends ICallMonad<any, any>> (call: IPipedCallMonad<Out, Previous>, arg: OutOf<Previous>): Out
-export function testCall<Out, In, Previous extends ICallMonad<any, any>> (call: ICallMonad<Out, In> | IPipedCallMonad<Out, Previous>, arg: In | OutOf<Previous>) {
-  if (isPiped(call)) {
-    return call.unWrap()(arg as OutOf<Previous>)
-  }
-  return call(arg as In)
+export function testCall<In, Out> (call: ICallMonad<Out, In, any>, arg: In) {
+  return call._fn(arg)
 }
 
 function isPiped (call: ICallMonad<any, any> | IPipedCallMonad<any, any>): call is IPipedCallMonad<any, any> {
