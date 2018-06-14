@@ -39,11 +39,11 @@ export interface IAggregate {
 }
 
 export interface IPipe {
-  <I extends ICallMonad<any, any>, O1, M1 extends Morphism> (this: I, op1: IOperator<OutOf<I>, O1, M1>): IPipedCallMonad<O1, I>
-  <I extends ICallMonad<any, any>, O1, M1 extends Morphism, O2, M2 extends Morphism> (this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>): IPipedCallMonad<O2, I>
-  <I extends ICallMonad<any, any>, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism> (this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>): IPipedCallMonad<O3, I>
-  <I extends ICallMonad<any, any>, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism> (this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>): IPipedCallMonad<O4, I>
-  <I extends ICallMonad<any, any>, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism, O5, M5 extends Morphism> (this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>, op5: IOperator<O4, O5, M5>): IPipedCallMonad<O5, I>
+  <I extends ICallMonad, O1, M1 extends Morphism> (this: I, op1: IOperator<OutOf<I>, O1, M1>): IPipedCallMonad<O1, I>
+  <I extends ICallMonad, O1, M1 extends Morphism, O2, M2 extends Morphism> (this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>): IPipedCallMonad<O2, I>
+  <I extends ICallMonad, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism> (this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>): IPipedCallMonad<O3, I>
+  <I extends ICallMonad, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism> (this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>): IPipedCallMonad<O4, I>
+  <I extends ICallMonad, O1, M1 extends Morphism, O2, M2 extends Morphism, O3, M3 extends Morphism, O4, M4 extends Morphism, O5, M5 extends Morphism> (this: I, op1: IOperator<OutOf<I>, O1, M1>, op2: IOperator<O1, O2, M2>, op3: IOperator<O2, O3, M3>, op4: IOperator<O3, O4, M4>, op5: IOperator<O4, O5, M5>): IPipedCallMonad<O5, I>
 }
 
 export type UnaryFunction<In, Out> = (arg: In) => Out
@@ -52,24 +52,24 @@ export type NullaryFunction<Out> = () => Out
 export type Morphism = UnaryFunction<any, any> | NullaryFunction<any>
 
 export type InOf<T> =
-  T extends ICallMonad<any, infer In> ? In :
+  T extends ICallMonad<any, any, infer In> ? In :
   T extends IOperator<infer In, any, any> ? In :
   T extends UnaryFunction<infer In, any> ? In :
   T extends NullaryFunction<any> ? undefined :
   any
 
 export type OutOf<T> =
-  T extends ICallMonad<infer Out, any> ? Out :
+  T extends ICallMonad<infer Out> ? Out :
   T extends IOperator<any, infer Out, any> ? Out :
   T extends UnaryFunction<any, infer Out> ? Out :
   T extends NullaryFunction<infer Out> ? Out :
   any
 
 export type InOfAll<T> =
-  T extends [ICallMonad<any, infer I1>, ICallMonad<any, infer I2>] ? [I1, I2] :
-  T extends [ICallMonad<any, infer I1>, ICallMonad<any, infer I2>, ICallMonad<any, infer I3>] ? [I1, I2, I3] :
-  T extends [ICallMonad<any, infer I1>, ICallMonad<any, infer I2>, ICallMonad<any, infer I3>, ICallMonad<any, infer I4>] ? [I1, I2, I3, I4] :
-  T extends [ICallMonad<any, infer I1>, ICallMonad<any, infer I2>, ICallMonad<any, infer I3>, ICallMonad<any, infer I4>, ICallMonad<any, infer I5>] ? [I1, I2, I3, I4, I5] :
+  T extends [ICallMonad<any, any, infer I1>, ICallMonad<any, any, infer I2>] ? [I1, I2] :
+  T extends [ICallMonad<any, any, infer I1>, ICallMonad<any, any, infer I2>, ICallMonad<any, any, infer I3>] ? [I1, I2, I3] :
+  T extends [ICallMonad<any, any, infer I1>, ICallMonad<any, any, infer I2>, ICallMonad<any, any, infer I3>, ICallMonad<any, any, infer I4>] ? [I1, I2, I3, I4] :
+  T extends [ICallMonad<any, any, infer I1>, ICallMonad<any, any, infer I2>, ICallMonad<any, any, infer I3>, ICallMonad<any, any, infer I4>, ICallMonad<any, any, infer I5>] ? [I1, I2, I3, I4, I5] :
   any[]
 
 export type OutOfAll<T> =
