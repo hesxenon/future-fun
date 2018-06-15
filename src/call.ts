@@ -1,5 +1,5 @@
-import { ILift, InOf, IOperator, aggregate, NullaryFunction, UnaryFunction, IAll } from '..'
-import { ICallMonad, IAllCallMonad } from './types'
+import { aggregate, IAll, ILift, InOf, IOperator, NullaryFunction, UnaryFunction } from '..'
+import { ICallMonad } from './types'
 
 export namespace Call {
   export const of: ILift = function <In, Out> (fn: NullaryFunction<Out> | UnaryFunction<In, Out>, thisArg?: any) {
@@ -8,15 +8,16 @@ export namespace Call {
         return fn.call(thisArg, arg)
       },
       {
-        pipe: function (this: ICallMonad<any, any>, ...operators: IOperator<any, any, any>[]) {
+        pipe: function (this: ICallMonad, ...operators: IOperator<any, any, any>[]) {
           const transform = aggregate(...operators)
-          return Object.assign(transform(this), { previous: this, unWrap: () => transform.morphism })
-        }
+          return Object.assign(transform(this), { previous: this, _fn: transform.morphism })
+        },
+        _fn: fn
       }
     )
   }
 
-  export const all: IAll = function (...calls: ICallMonad<any, any>[]): any {
+  export const all: IAll = function (...calls: ICallMonad[]): any {
     return Object.assign(Call.of((args: any[]) => calls.map((call, i) => call(args[i]))), {
       calls
     })

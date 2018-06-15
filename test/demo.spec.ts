@@ -1,6 +1,6 @@
 import { fail } from 'assert'
 import { assert } from 'chai'
-import { Call, map, flatMap } from '..'
+import { Call, map } from '..'
 import { testCall } from '../src/test'
 import { double, ident, stringify } from './test.util'
 
